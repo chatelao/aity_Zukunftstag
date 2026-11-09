@@ -4,30 +4,27 @@
 function UpdateGraphik () {
     basic.clearScreen()
     if (AktuellesLevel == 1) {
-        // LEVEL 1: Volles Logo (Linien)
+        // LEVEL 1: Binaere Fortschrittsanzeige (3, 5, 7, 9)
         if (ZeilenStatus[0]) {
-            // P0
-            led.plot(0, 0)
-            led.plot(1, 0)
-            led.plot(2, 0)
+            // 3 = 00011 (P0)
+            led.plot(3, 0)
+            led.plot(4, 0)
         }
         if (ZeilenStatus[1]) {
-            // P1
-            led.plot(1, 1)
+            // 5 = 00101 (P1)
             led.plot(2, 1)
-            led.plot(3, 1)
+            led.plot(4, 1)
         }
         if (ZeilenStatus[2]) {
-            // P2
+            // 7 = 00111 (P2)
             led.plot(2, 2)
             led.plot(3, 2)
             led.plot(4, 2)
         }
         if (ZeilenStatus[3]) {
-            // Taste A
+            // 9 = 01001 (Taste A)
             led.plot(1, 3)
-            led.plot(2, 3)
-            led.plot(3, 3)
+            led.plot(4, 3)
         }
         if (ZeilenStatus[4]) {
             // Taste B
