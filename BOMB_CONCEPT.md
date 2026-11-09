@@ -6,41 +6,40 @@
 ## 🎯 1. Übersicht & Spielidee
 
 ### 1.1 Das Szenario
-Die Teilnehmenden schlüpfen in die Rolle eines Bombenentschärfungs-Teams (z. B. angelehnt an das beliebte Konzept von *„Keep Talking and Nobody Explodes“*).
-Eine tickende „Zeitbombe“ (micro:bit) muss innerhalb eines Zeitlimits oder durch Lösen aufeinanderfolgender Sicherheitsmodule entschärft werden.
-Fehler (falsche Drähte, Erschütterungen, zu laute Geräusche) lösen entweder **Strikes** (Strafzeit / schnelleres Ticken) oder die sofortige **Detonation** aus!
+Die Teilnehmenden schlüpfen in die Rolle eines Bombenentschärfungs-Teams (angelehnt an das beliebte Koop-Konzept von *„Keep Talking and Nobody Explodes“*).
+Eine tickende „Zeitbombe“ (micro:bit) muss innerhalb eines Zeitlimits durch Lösen aufeinanderfolgender Sicherheitsmodule entschärft werden.
+Das gesamte Spiel funktioniert **völlig autark ohne externe Drähte oder Zubehör** – alle Eingaben erfolgen rein über die On-Board-Tasten, Gesten und Sensoren des micro:bit!
+
+Fehler lösen entweder **Strikes** (Strafzeit) oder die sofortige **Detonation** aus. Doch Teamwork zahlt sich aus: **Jeder gelöste Teilschritt belohnt das Team mit wertvoller Bonus-Restzeit!**
 
 ### 1.2 Warum analog zum Tresor?
 Wie beim **Tresor-Rätsel** (`2025/main.ts` und `LOESUNG.md`) basiert das Spiel auf:
 * **Mehrstufigem Ablauf (3 Phasen / Levels):**
-  1. *Level 1: Hardware & Verkabelung (Pins & Tasten)* – Drähte trennen / Brücken setzen.
-  2. *Level 2: Umweltsensoren & Erschütterung* – Vorsichtige Handhabung, Licht/Ton/Bewegung.
-  3. *Level 3: Das Finale / Der Entschärfungscode* – Kombination aus Lage/Kompass und Logo-Bestätigung.
-* **Klarem visuellem & auditivem Feedback:** 5x5 LED-Matrix zeigt den Status (z. B. Zeilen/Drähte oder Fortschritt), Soundeffekte signalisieren Fortschritt oder Strikes.
-* **Didaktischem Mehrwert:** Spielerisches Erkunden aller Sensoren und Schnittstellen des micro:bit.
+  1. *Level 1: Tasten- & Eingabesequenz* – Entschärfungs-Code über On-Board-Buttons eingeben.
+  2. *Level 2: Umweltsensoren & Erschütterung* – Vorsichtige Handhabung, Lichtsensor, Sound & ruhige Hand.
+  3. *Level 3: Das Finale / Der Entschärfungscode* – Kombination aus Ausrichtung (Kompass) und kapazitiver Logo-Bestätigung.
+* **Klarem visuellem & auditivem Feedback:**
+  * Die 5x5 LED-Matrix zeigt den **Countdown permanent sichtbar** als dynamischen Füllstandsbalken / Matrix-Timer an.
+  * Das **Ticken** passt sich der Dringlichkeit an (zuerst alle 10s, dann 5s und am Schluss alle 2s).
+* **Didaktischem Mehrwert:** Spielerisches Erkunden aller Sensoren des micro:bit ohne Aufbau-Aufwand (Plug & Play).
 
 ---
 
-## 🔍 2. Vollständige Übersicht aller micro:bit Möglichkeiten (Hardware & Features)
+## 🔍 2. Übersicht aller micro:bit Möglichkeiten (Hardware & Features)
 
-Der micro:bit (insbesondere Version 2, aber großteils auch Version 1) bietet vielfältige Ein- und Ausgabemöglichkeiten. Hier ist die vollständige Matrix aller Features und deren Einsatzmöglichkeiten für ein Bomben-Rätsel:
+Der micro:bit bietet vielfältige Ein- und Ausgabemöglichkeiten – komplett ohne externe Verkabelung:
 
 | Kategorie | Sensor / Feature | Verfügbarkeit | Erkennbare Aktionen / Werte | Einsatzmöglichkeit im Bomben-Rätsel |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tasten / Touch** | **Taste A & B** | v1 & v2 | Gedrückt, Losgelassen, Gleichzeitig gedrückt (A+B) | Code-Eingabe (Morsecode / Sequenz), Timer stoppen, Dual-Key-Sicherheitsschalter (beide Tasten gleichzeitig halten). |
-| | **Touch-Logo** | v2 | Berührt (Touch), Losgelassen, Lang gedrückt | Kapazitiver Fingerabdruck-Sensor / biometrische Freigabe; Kriechstrom-Prüfung; Not-Aus-Schalter. |
-| **Pins & I/O** | **Krokodilklemmen-Pins (0, 1, 2)** | v1 & v2 | Digital In/Out, Analog In (0-1023), Touch-Pin (mit GND) | **Draht-Module („Kabel durchtrennen“):**<br>• Verbindung GND mit P0/P1/P2 lösen (Draht kappen)<br>• Leitfähige Gegenstände (Alufolie, Drahtbrücke) verbinden. |
-| | **GND / 3V Pins** | v1 & v2 | Masse & Stromversorgung | Referenzpotenzial für Touch-Eingaben und Drahtbrücken. |
-| | **Edge Connector (P3-P20)** | v1 & v2 | Zusätzliche GPIOs, I2C, SPI | Erweiterbar für externe LED-Countdowns, Servomotoren, Drehpotentiometer. |
-| **Bewegung & Lage** | **Beschleunigungssensor (Accelerometer)** | v1 & v2 | Gesten: Schütteln, Neigen (Links/Rechts, Vor/Zurück), Bildschirm oben/unten (Face Up/Down), Freier Fall, 3g/6g/8g Schock | **Quecksilberschalter-Simulation:**<br>• Ruhige Hand: Bei Erschütterung oder Schütteln = Detonation oder Strike!<br>• Lage-Rätsel: Bombe muss in exakter Neigung gehalten werden, um Entschärfungsschraube zu lösen. |
-| **Orientierung** | **Kompass (Magnetometer)** | v1 & v2 | Magnetische Himmelsrichtung (0–359°), Magnetfeldstärke | **Orientierungs-Rätsel:** Bombe muss exakt nach Norden (oder eine geheime Richtung) ausgerichtet werden, um den Funksender zu stören. Auch Erkennung von echten Magneten möglich. |
-| **Akustik** | **Mikrofon (Sound Sensor)** | v2 | Lautes Geräusch (Loud Sound), Leises Geräusch (Quiet Sound), Schallpegel (0–255) | **Schallsensor-Zünder:**<br>• *Stille bewahren:* Wenn im Raum geredet/geschrien wird (> Schwellwert), tickt die Bombe doppelt so schnell.<br>• *Akustischer Code:* Klatschen (1x, 2x) zur Bestätigung. |
-| | **Integrierter Lautsprecher & Summer** | v2 (Speaker), v1 (via Pin 0/Kopfhörer) | Töne, Melodien, Frequenzen, Tonhöhe, Klicks | • Tickgeräusche (Intervall sinkt bei Zeitablauf)<br>• Warntöne / Alarmsirene<br>• Explosions-Sound (White Noise / Glissando abwärts)<br>• Siegesfanfare bei Entschärfung. |
-| **Optik** | **Lichtsensor** | v1 & v2 (über LED-Matrix gemessen) | Helligkeit / Lichtstärke (0–255) | **Lichtschranke / Fotodiode:**<br>• Bombe explodiert, wenn Licht darauf fällt (z.B. Auspacken aus der Kiste).<br>• Oder: Sensor muss abgedunkelt werden (Finger draufhalten), um einen Laser zu blockieren. |
-| | **5x5 LED-Display** | v1 & v2 | 25 rote LEDs mit Helligkeitsstufen, Symbole, Text-Laufschrift, Balkendiagramme | • Grafischer Countdown (LEDs erlöschen von 25 auf 0).<br>• Modul- und Draht-Statusanzeige.<br>• Strike-Anzeige (X für Fehler).<br>• Explosionsanimation vs. Häkchen / „DEFUSED“. |
-| | **Mikrofon-LED** | v2 | Zeigt Mikrofonaktivität an | Zusätzliche visuelle Kontroll-LED. |
-| **Umwelt** | **Temperatursensor** | v1 & v2 | Chiptemperatur in °C | **Thermischer Sensor:** Bombe durch Handwärme (oder Kältepusten) um 2 Grad erwärmen, um Kältesperre aufzuheben. |
-| **Kommunikation**| **Funk / Radio** | v1 & v2 | 2.4 GHz Paketfunk, Senden & Empfangen von Zahlen / Text | **Zwei-Geräte-Koop (Expert/Defuser):**<br>• micro:bit A ist die Bombe.<br>• micro:bit B ist das Diagnosegerät des Experten, das Status und Codes überträgt.<br>• Funk-Störsender (Radio-Signalstärke RSSI). |
+| **Tasten / Touch** | **Taste A & B** | v1 & v2 | Gedrückt, Losgelassen, Gleichzeitig gedrückt (A+B) | **Primäre Deaktivierungs-Codes:**<br>• Sequenz-Eingaben (z.B. A ➔ B ➔ A+B)<br>• Quittierung & Entsicherung. |
+| | **Touch-Logo** | v2 | Berührt (Touch), Losgelassen, Lang gedrückt | Kapazitiver Fingerabdruck-Sensor / biometrische Freigabe; Not-Aus-Schalter. |
+| **Bewegung & Lage** | **Beschleunigungssensor (Accelerometer)** | v1 & v2 | Gesten: Schütteln, Neigen (Links/Rechts, Vor/Zurück), Bildschirm oben/unten (Face Up/Down) | **Erschütterungssensor:**<br>• *Ruhige Hand:* Schütteln oder ruckartiges Bewegen löst Strikes aus!<br>• Lage-Rätsel: Bombe muss vorsichtig gehalten werden. |
+| **Orientierung** | **Kompass (Magnetometer)** | v1 & v2 | Magnetische Himmelsrichtung (0–359°) | **Orientierungs-Rätsel:** Bombe muss exakt nach Norden ausgerichtet werden, um das Magnetventil zu blockieren. |
+| **Akustik** | **Mikrofon (Sound Sensor)** | v2 | Lautes Geräusch (Loud Sound), Schallpegel (0–255) | **Schallsensor-Zünder:**<br>• Akustischer Impuls: Gezieltes Klatschen zum Überbrücken eines Relais.<br>• *Lärmverbot:* Bei zu lautem Geschrei tickt die Uhr schneller. |
+| | **Integrierter Lautsprecher & Summer** | v2 (Speaker), v1 (via Pin 0/Kopfhörer) | Töne, Melodien, Frequenzen, Ticks | • **Dynamisches Ticken:** Zuerst alle 10s, dann alle 5s, am Schluss alle 2s.<br>• Warntöne / Alarmsirene<br>• Detonationsgeräusch vs. Siegesfanfare. |
+| **Optik** | **Lichtsensor** | v1 & v2 (über LED-Matrix gemessen) | Helligkeit / Lichtstärke (0–255) | **Optischer Zünder / Lichtschranke:**<br>• Sensor muss abgedunkelt werden (Hand auflegen), um Laserstrahl zu unterbrechen. |
+| | **5x5 LED-Display** | v1 & v2 | 25 rote LEDs mit Helligkeitsstufen | • **Sichtbarer Countdown:** LEDs stellen die verbleibende Restzeit dar (z.B. Pixelraster erlischt schrittweise).<br>• Fehleranzeige (Strike-Symbol `X`).<br>• End-Animationen (Totenkopf `Skull` vs. Häkchen `Yes`). |
+| **Umwelt** | **Temperatursensor** | v1 & v2 | Chiptemperatur in °C | Optional: Thermische Sperre durch Handwärme. |
 
 ---
 
@@ -53,20 +52,20 @@ Das Spiel besteht aus **3 Sicherheitsstufen (Levels)**, die nacheinander gelöst
                    │
                    ▼
   ┌─────────────────────────────────┐
-  │   LEVEL 1: Die Draht-Matrix     │ ➔ 3 Drähte (P0, P1, P2) in richtiger
-  │   (Kabel & Tasten)              │   Reihenfolge kappen (GND lösen)
+  │   LEVEL 1: Der Tastencode       │ ➔ Sequenz über Taste A, B & A+B eingeben.
+  │   (Keine Drähte nötig!)         │   Jeder Treffer gibt Bonuszeit (+15s)!
   └─────────────────────────────────┘
-                   │  Erfolg (Level 1 cleared)
+                   │  Erfolg (Level 1 cleared) + Bonuszeit
                    ▼
   ┌─────────────────────────────────┐
-  │   LEVEL 2: Sensoren & Umwelt    │ ➔ Bewegungslosigkeit (Accelerometer),
-  │   (Licht, Sound, Erschütterung) │   Licht abdecken & 2x Klatschen
-  └─────────────────────────────────┘
+  │   LEVEL 2: Sensoren & Umwelt    │ ➔ Dunkelheit (Lichtsensor) + Klatschen.
+  │   (Licht, Sound, Erschütterung) │   Erschütterung (Shake) gibt Strike!
+  └─────────────────────────────────┘   Erfolg belohnt mit Bonuszeit (+20s)!
                    │  Erfolg (Level 2 cleared)
                    ▼
   ┌─────────────────────────────────┐
   │   LEVEL 3: Der Finale Code      │ ➔ Nach Norden ausrichten (Kompass)
-  │   (Ausrichtung & Touch-Logo)    │   + Logo 3 Sekunden gedrückt halten
+  │   (Ausrichtung & Touch-Logo)    │   + Logo 3 Sekunden gedrückt halten.
   └─────────────────────────────────┘
                    │
       ┌────────────┴────────────┐
@@ -77,37 +76,39 @@ Das Spiel besteht aus **3 Sicherheitsstufen (Levels)**, die nacheinander gelöst
 
 ---
 
-### 3.1 Level 1: Die Draht-Matrix (Kabel & Tasten)
-* **Thema:** Klassisches Entschärfen durch Durchtrennen/Abziehen von Kabeln.
-* **Erkennungszeichen auf LED:** 5 durchgehende horizontale Balken (wie im Tresor Level 1).
-* **Hardware-Aufbau:** Krokodilklemmen verbinden GND mit **P0**, **P1** und **P2**.
+### 3.1 Level 1: Die Tasten-Sicherheitssequenz (Keine Drähte!)
+* **Thema:** Deaktivierung der digitalen Steuereinheit über eine festgelegte Tastenkombination am Board.
+* **Sichtbarer Countdown & Status:** Das LED-Display zeigt permanent den Countdown als Füllstand (von 25 LEDs abwärts zählend). Kurze Tastendrücke blenden kurz das Tastenfeedback ein.
 * **Aufgabe & Mechanik:**
-  * Die Drähte müssen in einer bestimmten **Reihenfolge** entfernt werden (z. B. zuerst Gelb/P1, dann Blau/P0, dann Rot/P2).
-  * Anschließend müssen **Taste A** und **Taste B** als Sicherheitsquittierung betätigt werden.
-  * **Fehler-Logik:** Zieht jemand den falschen Draht zuerst, ertönt ein Fehlerton (Buzzer) und ein Strike (Strafzeit -15s) wird vergeben.
-* **Erfolgs-Feedback:** Jede korrekte Aktion löscht eine Zeile auf dem Display. Sind alle 5 Zeilen gelöscht ➔ Kurze Melodie, Zwischenstand gespeichert, Übergang zu Level 2.
+  * Das Team muss anhand des Handbuchs eine 4-teilige Tastensequenz eingeben:
+    1. **Taste A**
+    2. **Taste B**
+    3. **Taste A+B (beide Tasten gleichzeitig)**
+    4. **Taste A**
+  * **Belohnungs-Mechanik (Zeit-Bonus):** Jeder korrekt eingegebene Schritt addiert **+15 Sekunden** auf die Restzeit und erzeugt einen positiven Quittungston!
+  * **Fehler-Logik:** Eine falsche Taste in der Sequenz setzt den Fortschritt zurück und vergibt einen Strike.
+* **Erfolgs-Feedback:** Bestätigungsmelodie, **+20 Sekunden Bonus**, automatischer Wechsel zu Level 2.
 
 ---
 
-### 3.2 Level 2: Der Erschütterungs- & Umwelt-Mechanismus
-* **Thema:** Der Zünder reagiert empfindlich auf äußere Einflüsse (Licht, Erschütterung, Schall).
-* **Erkennungszeichen auf LED:** Ein pulsierendes Warnsymbol (z. B. ein zentrierter Punkt oder ein Ausrufezeichen).
+### 3.2 Level 2: Der Erschütterungs- & Umweltsensor
+* **Thema:** Der Zünder reagiert hochsensibel auf Licht und Erschütterungen.
+* **Sichtbarer Countdown:** Die LED-Matrix zählt weiter sichtbar herunter.
 * **Aufgabe & Mechanik:**
-  1. **Lichtschranke blockieren:** Den Lichtsensor abdunkeln (Hand über das Board legen: `lightLevel() < 15`).
-  2. **Akustischer Impuls:** Während es dunkel ist, ein kurzes lautes Klatschen erzeugen (`DetectedSound.Loud`).
-  3. **Stille & Erschütterungsfreiheit bewahren:** Für 3 Sekunden darf der micro:bit nicht bewegt werden (Erschütterung / `onGesture(Shake)` gibt sofort einen Strike!).
-* **Erfolgs-Feedback:** Display zeigt ein Schloss-Symbol, gefolgt von zwei kurzen Bestätigungstönen.
+  1. **Lichtschranke blockieren:** Den Lichtsensor auf der LED-Matrix vollständig mit der flachen Hand abdunkeln (`lightLevel() < 15`).
+  2. **Akustischer Entlastungsimpuls:** Während es dunkel ist, gezielt **einmal laut klatschen** (`DetectedSound.Loud`).
+  3. **Strikte Erschütterungsfreiheit:** Während des gesamten Moduls darf der micro:bit nicht geschüttelt werden (`onGesture(Shake)` erzeugt sofort einen Strike!).
+* **Belohnungs-Mechanik (Zeit-Bonus):** Das erfolgreiche Überbrücken des Sensors schenkt dem Team **+25 Sekunden Bonuszeit**!
+* **Erfolgs-Feedback:** Schloss-Symbol / Doppelton, Übergang zu Level 3.
 
 ---
 
-### 3.3 Level 3: Der Finale Entschärfungscode (Kompass & Touch)
-* **Thema:** Die Deaktivierung der Hauptladung erfordert die exakte Ausrichtung des Geräts und biometrische Freigabe.
-* **Erkennungszeichen auf LED:** Ein Kompass-Pfeil oder rotierender Strich.
+### 3.3 Level 3: Der Finale Entschärfungscode (Kompass & Touch-Logo)
+* **Thema:** Das Deaktivieren der Hauptladung erfordert präzise Ausrichtung und biometrische Freigabe.
 * **Aufgabe & Mechanik:**
-  1. **Kompass-Ausrichtung:** Der micro:bit muss flach gehalten und nach **Norden** ausgerichtet werden (Magnetischer Kurs zwischen 350° und 10°).
-  2. Sobald die Nord-Richtung stabil gehalten wird, beginnen die LEDs am Rand im Kreis zu laufen.
-  3. **Biometrische Bestätigung:** Während die Ausrichtung stimmt, muss das **goldene Touch-Logo** für mindestens 3 Sekunden ununterbrochen berührt werden.
-* **Erfolgs-Feedback:** Das Ticken stoppt sofort!
+  1. **Kompass-Ausrichtung:** Der micro:bit muss flach auf den Tisch gelegt und exakt nach **Norden** ausgerichtet werden (Magnetkurs zwischen 350° und 10°).
+  2. **Biometrische Entschärfung:** Sobald die Nord-Richtung stimmt, muss das **goldene Touch-Logo** für mindestens 3 Sekunden ununterbrochen berührt werden.
+* **Erfolgs-Feedback:** Das Ticken stoppt sofort – die Bombe ist entschärft!
 
 ---
 
@@ -115,145 +116,158 @@ Das Spiel besteht aus **3 Sicherheitsstufen (Levels)**, die nacheinander gelöst
 
 #### 🏆 Szenario A: Bombe erfolgreich entschärft (DEFUSED)
 * **Visualisierung:** Großes Häkchen (`IconNames.Yes`), danach Laufschrift: `"DEFUSED!"`.
-* **Audio:** Siegesfanfare / triumphale Tonfolge (z. B. Melodie wie im Tresor).
-* **Status:** Der micro:bit geht in einen sicheren Ruhezustand; keine weiteren Eingaben möglich.
+* **Audio:** Siegesfanfare (triumphale Melodie).
+* **Status:** Der Timer stoppt, das System schaltet sich sicher ab.
 
 #### 💥 Szenario B: Detonation (BOOM!)
-* **Trigger:** Countdown erreicht 00:00 ODER 3 Strikes gesammelt.
-* **Visualisierung:**
-  1. Display flackert hektisch auf voller Helligkeit.
-  2. Totenkopf-Symbol (`IconNames.Skull`) oder Explosionswolke.
-  3. Laufschrift: `"BOOM! GAME OVER"`.
-* **Audio:** Schneller abfallender Glissando-Ton / tiefes Rauschen, gefolgt von einem langen tiefen Fehlerton.
+* **Trigger:** Countdown erreicht 0 Sekunden ODER 3 Strikes erreicht.
+* **Visualisierung:** Display flackert hektisch, Totenkopf-Symbol (`IconNames.Skull`), Laufschrift `"BOOM!"`.
+* **Audio:** Absteigendes Glissando, dumpfer Explosions-Ton.
 
 ---
 
 ## ⏱️ 4. Feedback-, Timer- und Strike-System
 
-1. **Der Haupt-Timer (Countdown):**
-   * Gesamtdauer standardmäßig: **3:00 Minuten (180 Sekunden)** (konfigurierbar).
-   * Hintergrund-Schleife zählt sekündlich runter.
-   * **Auditives Ticken:** Jede Sekunde ein kurzer Ton (`music.playTone(880, 20)`). In den letzten 30 Sekunden verdoppelt sich die Frequenz (alle 500 ms).
-   * **Visueller Countdown:** Kann durch Drücken von A+B jederzeit kurz als Balken oder Ziffern angezeigt werden.
+### 4.1 Der sichtbare LED-Countdown
+* **25-LED-Raster als Zeitbalken:** Die 5x5 LED-Matrix dient als ständiger visueller Countdown.
+* Zu Beginn leuchten alle 25 LEDs. Mit fortschreitender Zeit erlöschen die LEDs nacheinander (jede LED entspricht einem proportionalen Zeitanteil).
+* **Zeitzugewinn sichtbar:** Wird ein Schritt gelöst und die Restzeit erhöht sich, **schalten sich erloschene LEDs wieder an**! Das Team sieht sofort, wie wertvolle Zeit zurückgewonnen wird.
 
-2. **Das Strike-System (Fehlversuche):**
-   * Maximal 3 Strikes erlaubt.
-   * Bei Strike 1: LED zeigt kurz ein großes `"X"`, Timer wird um 20 Sekunden gekürzt, Ticken wird spürbar schneller.
-   * Bei Strike 2: LED zeigt `"XX"`, Timer um weitere 30 Sekunden gekürzt.
-   * Bei Strike 3: Sofortige Detonation!
+### 4.2 Das 3-Stufen-Tickintervall
+Das akustische Ticken passt sich dynamisch der verbleibenden Restzeit an:
+1. **Entspannte Phase (> 60 Sekunden Restzeit):** Ticken ertönt gemächlich **alle 10 Sekunden**.
+2. **Kritische Phase (20 bis 60 Sekunden Restzeit):** Ticken beschleunigt sich auf **alle 5 Sekunden**.
+3. **Panik-Phase (< 20 Sekunden Restzeit):** Ticken hetzt **alle 2 Sekunden**.
+
+### 4.3 Schrittweiser Zeit-Bonus
+* Ein gelöster Teilschritt in Level 1: **+15 Sekunden**
+* Abschluss von Level 1: **+20 Sekunden**
+* Abschluss von Level 2: **+25 Sekunden**
+* Dadurch können Teams, die schnell kombinieren, ihre Überlebenschancen aktiv verbessern.
+
+### 4.4 Das Strike-System
+* Maximal 3 Strikes erlaubt.
+* Strike 1 & 2: Warnton, kurzes `"X"`, Abzug von 15 Sekunden.
+* Strike 3: Sofortige Detonation!
 
 ---
 
-## 📜 5. Lösungsanleitung / "Handbuch für den Bombenexperten" (analog LOESUNG.md)
+## 📜 5. Handbuch des Bombenexperten (Für die Mitspieler)
 
-> Dieses Handbuch erhalten die Teammitglieder, die den micro:bit *nicht* berühren dürfen, sondern dem Entschärfer Anweisungen geben müssen!
+> Die Experten sitzen abgewandt mit dem Handbuch. Nur der Entschärfer bedient den micro:bit!
 
 ```markdown
 # 📋 Das Handbuch des Bombenexperten
 
 ## ⚠️ Sicherheitsregeln
-1. Berühre die Bombe niemals selbst – nur der Entschärfer vor Ort bedient das Gerät!
-2. Höre auf das Ticken: Wird es schneller, habt ihr einen Strike kassiert!
-3. Bei 3 Strikes oder Ablauf des Timers detoniert das System.
+1. Berühre die Bombe niemals selbst – nur der Entschärfer vor Ort bedient den micro:bit!
+2. Achtung auf das Ticken: Zuerst tickt es alle 10 Sekunden, dann alle 5 Sekunden und unter 20 Sekunden alle 2 Sekunden!
+3. Richtige Schritte schenken euch wertvolle Bonuszeit (+15s bis +25s)!
+4. Bei 3 Strikes oder Ablauf des Timers explodiert das System.
 
 ---
 
-### 1️⃣ Modul 1: Die Kabelsequenz
-* **Anzeige:** 5 durchgezogene LED-Balken.
+### 1️⃣ Modul 1: Die Tasten-Sicherheitssequenz
+* **Anzeige:** LEDs zeigen den Countdown.
 * **Aktion:**
-  1. Trenne zuerst das Kabel an **Pin 1** (Zweite Zeile erlischt).
-  2. Trenne als zweites das Kabel an **Pin 0** (Oberste Zeile erlischt).
-  3. Trenne als drittes das Kabel an **Pin 2** (Dritte Zeile erlischt).
-  4. Drücke kurz **Taste A** (Vierte Zeile erlischt).
-  5. Drücke kurz **Taste B** (Unterste Zeile erlischt).
-* *Achtung: Jedes falsche Kabel gibt sofort einen Strike!*
+  Gib am micro:bit nacheinander folgende Tastenkombination ein:
+  1. Drücke **Taste A** (ein heller Pieps bestätigt; Zeitbonus wird gutgeschrieben!)
+  2. Drücke **Taste B**
+  3. Drücke **Taste A und Taste B gleichzeitig (A+B)**
+  4. Drücke nochmals **Taste A**
+* *Achtung: Eine falsche Taste gibt einen Strike und setzt die Tastenfolge zurück!*
 
 ---
 
 ### 2️⃣ Modul 2: Der Erschütterungs- & Schallsensor
-* **Anzeige:** Ein blinkender Punkt in der Mitte.
+* **Anzeige:** Countdown läuft sichtbar weiter.
 * **Aktion:**
-  1. Halte die Bombe absolut ruhig – **NICHT schütteln**!
-  2. Decke das Display vollständig mit der flachen Hand ab (Dunkelheit).
-  3. Während es dunkel ist: Klatsche **einmal laut** in die Hände!
-  4. Nimm die Hand weg, sobald ein Doppelpieps ertönt.
+  1. Halte den micro:bit absolut ruhig – **NICHT schütteln** (Schütteln gibt sofort einen Strike)!
+  2. Decke das gesamte 5x5 Display mit der flachen Hand lichtdicht ab.
+  3. Während es dunkel ist: Klatsche **einmal kräftig in die Hände**!
+  4. Ein Doppelton und ein Zeitzuschlag signalisieren den Erfolg.
 
 ---
 
-### 3️⃣ Modul 3: Die End-Deaktivierung
-* **Anzeige:** Ein Kompass-Pfeil.
+### 3️⃣ Modul 3: Das Finale (Orientierung & Biometrie)
+* **Anzeige:** Countdown nähert sich dem Ende.
 * **Aktion:**
-  1. Drehe die Bombe vorsichtig flach auf dem Tisch, bis sie **genau nach Norden** (0°) zeigt.
-  2. Wenn die Richtung stimmt, blinkt der äußere LED-Rahmen.
-  3. Halte nun das **goldene micro:bit Logo** für **3 Sekunden** fest berührt.
-* **Erfolg:** Das Häkchen erscheint, die Melodie spielt – die Bombe ist entschärft!
+  1. Lege den micro:bit flach hin und drehe ihn exakt nach **Norden** (0°).
+  2. Sobald die Nord-Richtung stimmt: Halte das **goldene micro:bit Logo** für mindestens **3 Sekunden** fest berührt.
+* **Erfolg:** Das Häkchen erscheint, die Siegesfanfare ertönt – BOMB DEFUSED!
 ```
 
 ---
 
 ## 💻 6. Technische Software-Architektur (MakeCode TypeScript)
 
-Hier ist die Architektur für das neue Rätsel, direkt umsetzbar in MakeCode analog zu `main.ts`:
+Hier ist die vollständige Implementierung ohne externe Drähte, mit sichtbarem LED-Countdown, gestaffeltem Ticken und Zeit-Bonus pro Schritt:
 
 ```typescript
 /**
  * BOMB DEFUSAL PUZZLE (MakeCode TypeScript)
- * Analog zum Tresor-Rätsel 2025
+ * Komplett autark ohne externe Drähte
  */
 
 // --- Spiel-Zustände ---
-let AktuellesLevel = 1      // 1 = Wires, 2 = Sensors, 3 = Compass/Logo, 4 = Defused, 5 = Detonated
+let AktuellesLevel = 1      // 1 = Tasten, 2 = Sensoren, 3 = Kompass/Logo, 4 = Defused, 5 = Detonated
 let Strikes = 0
 const MAX_STRIKES = 3
-let ZeitUebrig = 180         // Sekunden
+const MAX_ZEIT = 120        // Maximale Startzeit in Sekunden
+let ZeitUebrig = 90         // Aktuelle Restzeit in Sekunden
 let SpielGesperrt = false
-let ZeilenStatus = [true, true, true, true, true]
+
+// Fortschritt in Level 1 (Tastensequenz: A -> B -> A+B -> A)
+let TastenSchritt = 0
+
+// Zeit-Tracking für Ticken
+let LetzterTick = 0
 
 // --- Start & Initialisierung ---
 function StartSpiel() {
     AktuellesLevel = 1
     Strikes = 0
-    ZeitUebrig = 180
+    ZeitUebrig = 90
+    TastenSchritt = 0
     SpielGesperrt = false
-    ZeilenStatus = [true, true, true, true, true]
-    UpdateGraphik()
+    LetzterTick = control.millis()
+    UpdateDisplay()
 }
 
-// --- Visualisierung ---
-function UpdateGraphik() {
+// --- Sichtbarer Countdown auf der 5x5 LED-Matrix ---
+function UpdateDisplay() {
+    if (SpielGesperrt) return
     basic.clearScreen()
-    if (AktuellesLevel == 1) {
-        // Level 1: Horizontale Balken (Befestigte Drähte)
-        for (let i = 0; i < 5; i++) {
-            if (ZeilenStatus[i]) {
-                for (let x = 0; x < 5; x++) {
-                    led.plot(x, i)
-                }
-            }
-        }
-    } else if (AktuellesLevel == 2) {
-        // Level 2: Sensor-Fokus (Blinkendes Zentrum)
-        led.plot(2, 2)
-    } else if (AktuellesLevel == 3) {
-        // Level 3: Fadenkreuz / Kompass
-        led.plot(2, 1)
-        led.plot(2, 3)
-        led.plot(1, 2)
-        led.plot(3, 2)
+
+    // 25 LEDs repräsentieren den Countdown
+    // Zeit proportional auf 25 LEDs umrechnen (max 120s = 25 LEDs)
+    let leuchtendeLeds = Math.clamp(0, 25, Math.ceil((ZeitUebrig / MAX_ZEIT) * 25))
+
+    for (let i = 0; i < leuchtendeLeds; i++) {
+        let x = i % 5
+        let y = Math.floor(i / 5)
+        led.plot(x, y)
     }
+}
+
+// --- Zeit-Bonus gutschreiben ---
+function AddiereBonuszeit(sekunden: number) {
+    ZeitUebrig = Math.min(MAX_ZEIT, ZeitUebrig + sekunden)
+    music.playTone(988, 80) // Heller Bestätigungston
+    UpdateDisplay()
 }
 
 // --- Fehler- / Strike-Behandlung ---
 function RegistriereFehler() {
     Strikes++
-    music.playTone(200, music.beat(BeatFraction.Double))
+    music.playTone(200, 300)
     basic.showIcon(IconNames.No)
-    basic.pause(500)
-    ZeitUebrig = Math.max(5, ZeitUebrig - 20) // 20s Zeitstrafe
+    basic.pause(400)
+    ZeitUebrig = Math.max(3, ZeitUebrig - 15) // Zeitstrafe: -15s
     if (Strikes >= MAX_STRIKES) {
         Detoniere()
     } else {
-        UpdateGraphik()
+        UpdateDisplay()
     }
 }
 
@@ -261,7 +275,7 @@ function RegistriereFehler() {
 function Detoniere() {
     AktuellesLevel = 5
     SpielGesperrt = true
-    music.playTone(130, music.beat(BeatFraction.Whole))
+    music.playTone(130, 800)
     basic.showIcon(IconNames.Skull)
     music.playMelody("C5 B A G F E D C ", 300)
     basic.showString("BOOM!")
@@ -276,14 +290,30 @@ function Entschaerft() {
     basic.showString("DEFUSED!")
 }
 
-// --- Hintergrund-Timer & Ticken ---
+// --- Hintergrund-Schleife: Timer, Ticken & Countdown-Update ---
 control.inBackground(function () {
     while (AktuellesLevel < 4) {
         basic.pause(1000)
         ZeitUebrig--
-        // Ticken
-        let tonIntervall = ZeitUebrig < 30 ? 1046 : 880
-        music.playTone(tonIntervall, 20)
+
+        // Berechne Tick-Intervall abhängig von Restzeit:
+        // > 60s  -> alle 10 Sekunden
+        // 20-60s -> alle 5 Sekunden
+        // < 20s  -> alle 2 Sekunden
+        let tickIntervallMs = 10000
+        if (ZeitUebrig <= 20) {
+            tickIntervallMs = 2000
+        } else if (ZeitUebrig <= 60) {
+            tickIntervallMs = 5000
+        }
+
+        let jetzt = control.millis()
+        if (jetzt - LetzterTick >= tickIntervallMs) {
+            music.playTone(880, 25)
+            LetzterTick = jetzt
+        }
+
+        UpdateDisplay()
 
         if (ZeitUebrig <= 0) {
             Detoniere()
@@ -292,68 +322,51 @@ control.inBackground(function () {
     }
 })
 
-// --- Level 1 Inputs (Kabel in exakter Reihenfolge P1 -> P0 -> P2) ---
-let DrahtSchritt = 0
-input.onPinReleased(TouchPin.P1, function () {
-    if (AktuellesLevel != 1 || SpielGesperrt) return
-    if (DrahtSchritt == 0) {
-        ZeilenStatus[1] = false
-        DrahtSchritt++
-        music.playTone(523, 50)
-        UpdateGraphik()
-    } else {
-        RegistriereFehler()
-    }
-})
-
-input.onPinReleased(TouchPin.P0, function () {
-    if (AktuellesLevel != 1 || SpielGesperrt) return
-    if (DrahtSchritt == 1) {
-        ZeilenStatus[0] = false
-        DrahtSchritt++
-        music.playTone(587, 50)
-        UpdateGraphik()
-    } else {
-        RegistriereFehler()
-    }
-})
-
-input.onPinReleased(TouchPin.P2, function () {
-    if (AktuellesLevel != 1 || SpielGesperrt) return
-    if (DrahtSchritt == 2) {
-        ZeilenStatus[2] = false
-        DrahtSchritt++
-        music.playTone(659, 50)
-        UpdateGraphik()
-    } else {
-        RegistriereFehler()
-    }
-})
-
+// --- Level 1: Tastensequenz (A -> B -> A+B -> A) ohne externe Drähte ---
 input.onButtonPressed(Button.A, function () {
     if (AktuellesLevel != 1 || SpielGesperrt) return
-    if (DrahtSchritt == 3) {
-        ZeilenStatus[3] = false
-        DrahtSchritt++
-        music.playTone(698, 50)
-        UpdateGraphik()
+
+    if (TastenSchritt == 0) {
+        TastenSchritt = 1
+        AddiereBonuszeit(15) // Schritt 1 gelöst: +15s!
+    } else if (TastenSchritt == 3) {
+        TastenSchritt = 0
+        AddiereBonuszeit(20) // Level 1 abgeschlossen: +20s!
+        AktuellesLevel = 2
+        basic.showIcon(IconNames.Yes)
+        basic.pause(800)
+        UpdateDisplay()
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
     }
 })
 
 input.onButtonPressed(Button.B, function () {
     if (AktuellesLevel != 1 || SpielGesperrt) return
-    if (DrahtSchritt == 4) {
-        ZeilenStatus[4] = false
-        music.playTone(784, 50)
-        // Level 1 beendet -> Wechsel zu Level 2
-        AktuellesLevel = 2
-        basic.showIcon(IconNames.Yes)
-        basic.pause(1000)
-        UpdateGraphik()
+
+    if (TastenSchritt == 1) {
+        TastenSchritt = 2
+        AddiereBonuszeit(15) // Schritt 2 gelöst: +15s!
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
     }
 })
 
-// --- Level 2 Inputs (Sensoren: Dunkelheit + Sound, Erschütterungsverbot) ---
+input.onButtonPressed(Button.AB, function () {
+    if (AktuellesLevel != 1 || SpielGesperrt) return
+
+    if (TastenSchritt == 2) {
+        TastenSchritt = 3
+        AddiereBonuszeit(15) // Schritt 3 gelöst: +15s!
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
+    }
+})
+
+// --- Level 2: Sensoren (Dunkelheit + Lauter Sound, Erschütterungsverbot) ---
 input.onGesture(Gesture.Shake, function () {
     if (AktuellesLevel == 2 && !SpielGesperrt) {
         RegistriereFehler() // Bombe darf in Level 2 nicht geschüttelt werden!
@@ -363,30 +376,29 @@ input.onGesture(Gesture.Shake, function () {
 input.onSound(DetectedSound.Loud, function () {
     if (AktuellesLevel == 2 && !SpielGesperrt) {
         if (input.lightLevel() < 15) {
-            // Richtig: Abgedunkelt UND laut geklatscht
+            // Richtig: Abgedunkelt UND geklatscht!
+            AddiereBonuszeit(25) // Level 2 gelöst: +25s!
             AktuellesLevel = 3
-            music.playTone(880, 100)
             basic.showIcon(IconNames.Yes)
-            basic.pause(1000)
-            UpdateGraphik()
+            basic.pause(800)
+            UpdateDisplay()
         } else {
             RegistriereFehler()
         }
     }
 })
 
-// --- Level 3 Inputs (Kompass Nord + Touch Logo) ---
+// --- Level 3: Kompass (Nord) + Touch-Logo ---
 let logoGedruecktDauer = 0
 basic.forever(function () {
     if (AktuellesLevel == 3 && !SpielGesperrt) {
         let heading = input.compassHeading()
-        // Richtung Norden: heading < 15 oder > 345
         let isNord = (heading < 15 || heading > 345)
 
         if (isNord && input.logoIsPressed()) {
             logoGedruecktDauer++
-            music.playTone(440 + logoGedruecktDauer * 100, 50)
-            if (logoGedruecktDauer >= 6) { // ca. 3 Sekunden (bei 500ms Schleife)
+            music.playTone(500 + logoGedruecktDauer * 120, 60)
+            if (logoGedruecktDauer >= 6) { // ca. 3 Sekunden gehalten
                 Entschaerft()
             }
         } else {
@@ -404,6 +416,7 @@ StartSpiel()
 
 ## 🚀 7. Didaktischer Mehrwert & Workshop-Einsatz
 
-* **Teamwork & Kommunikation:** Das Spiel fördert exaktes Erklären und Zuhören (Information Gap: Experte mit Handbuch vs. Entschärfer an der Hardware).
-* **Sensorik begreifbar machen:** Die Jugendlichen lernen, wie digitale Inputs (Pins, Tasten), analoge Umweltsensoren (Licht, Sound, Temperatur) und Bewegungssensoren (Beschleunigung, Kompass) in Code verarbeitet werden.
-* **Hoher Spaßfaktor:** Der Countdown, das realistische Ticken und die Soundkulisse schaffen eine packende Escape-Room-Atmosphäre für den Zukunftstag.
+* **Zero-Setup & Plug & Play:** Da keine externen Drähte oder Krokodilklemmen benötigt werden, ist das Spiel sofort einsatzbereit, robust und ausfallsicher.
+* **Spannungsaufbau durch adaptives Ticken:** Der Übergang von 10s auf 5s und schließlich 2s Taktung erzeugt authentische Escape-Room-Atmosphäre und zwingt die Jugendlichen zur Fokussierung.
+* **Transparenz durch sichtbaren Countdown:** Das 5x5 LED-Raster vermittelt den Zeitdruck unmittelbar und visuell begreifbar.
+* **Positive Verstärkung:** Dass gelöste Schritte wertvolle Bonuszeit zurückgeben, belohnt strukturiertes und ruhiges Vorgehen der Gruppe.
