@@ -1,0 +1,68 @@
+name: CI/CD Pipeline - micro:bit v2.2
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test micro:bit v2 (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - "2025"
+          - "2026"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install PXT CLI
+        run: npm install -g pxt
+
+      - name: Initialize MakeCode micro:bit target
+        working-directory: ${{ matrix.project }}
+        run: pxt target microbit
+
+      - name: Install MakeCode project dependencies
+        working-directory: ${{ matrix.project }}
+        run: pxt install
+
+      - name: Compile project
+        working-directory: ${{ matrix.project }}
+        run: pxt build
+
+      - name: Run MakeCode tests
+        working-directory: ${{ matrix.project }}
+        run: pxt test
+
+      - name: Verify micro:bit v2 compatibility
+        working-directory: ${{ matrix.project }}
+        run: |
+          echo "Verifying micro:bit v2.2 build artifacts..."
+          test -f built/binary.hex || { echo "Error: built/binary.hex missing"; exit 1; }
+          test -f built/mbcodal-binary.hex || { echo "Error: built/mbcodal-binary.hex missing"; exit 1; }
+          test -f built/codal.json || { echo "Error: built/codal.json missing"; exit 1; }
+          echo "micro:bit v2 build verified successfully!"
+
+      - name: Upload compiled binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: microbit-${{ matrix.project }}-hex
+          path: |
+            ${{ matrix.project }}/built/binary.hex
+            ${{ matrix.project }}/built/mbcodal-binary.hex
