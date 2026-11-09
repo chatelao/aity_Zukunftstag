@@ -1,16 +1,14 @@
 {
-    "name": "Zukunftstag_2025",
-    "description": "",
+    "name": "Zukunftstag_2026",
+    "description": "Die Zeitbombe - Standalone Bomb Defusal Puzzle Game für BBC micro:bit",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "microphone": "*"
     },
     "files": [
-        "main.blocks",
         "main.ts",
-        "README.md",
-        "main.py"
+        "README.md"
     ],
     "testFiles": [
         "test.ts"
@@ -22,5 +20,5 @@
     "supportedTargets": [
         "microbit"
     ],
-    "preferredEditor": "blocksprj"
+    "preferredEditor": "tsprj"
 }

@@ -1,190 +1,206 @@
 /**
- * Globale Variablen
+ * BOMB DEFUSAL PUZZLE (MakeCode TypeScript)
+ * Komplett autark ohne externe Drähte
  */
-function UpdateGraphik () {
-    basic.clearScreen()
-    if (AktuellesLevel == 1) {
-        // LEVEL 1: Volles Logo (Linien)
-        if (ZeilenStatus[0]) {
-            // P0
-            led.plot(0, 0)
-            led.plot(1, 0)
-            led.plot(2, 0)
-        }
-        if (ZeilenStatus[1]) {
-            // P1
-            led.plot(1, 1)
-            led.plot(2, 1)
-            led.plot(3, 1)
-        }
-        if (ZeilenStatus[2]) {
-            // P2
-            led.plot(2, 2)
-            led.plot(3, 2)
-            led.plot(4, 2)
-        }
-        if (ZeilenStatus[3]) {
-            // Taste A
-            led.plot(1, 3)
-            led.plot(2, 3)
-            led.plot(3, 3)
-        }
-        if (ZeilenStatus[4]) {
-            // Taste B
-            led.plot(0, 4)
-            led.plot(1, 4)
-            led.plot(2, 4)
-        }
-    } else if (AktuellesLevel == 2) {
-        // LEVEL 2: Hohles Logo (Nur Punkte/Kontur)
-        if (ZeilenStatus[0]) {
-            // Schütteln
-            led.plot(0, 0)
-            led.plot(2, 0)
-        }
-        // Lücke in der Mitte
-        if (ZeilenStatus[1]) {
-            // A+B
-            led.plot(1, 1)
-            led.plot(3, 1)
-        }
-        if (ZeilenStatus[2]) {
-            // Links
-            led.plot(2, 2)
-            led.plot(4, 2)
-        }
-        if (ZeilenStatus[3]) {
-            // Rechts
-            led.plot(1, 3)
-            led.plot(3, 3)
-        }
-        if (ZeilenStatus[4]) {
-            // Kopfueber
-            led.plot(0, 4)
-            led.plot(2, 4)
-        }
-    }
-}
-// --- INPUTS LEVEL 1 (Pins & Buttons) ---
-// Nur wirksam in Level 1
-input.onPinPressed(TouchPin.P0, function () {
-    ZeileLoeschen(0, 1)
-})
-input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    ZeileLoeschen(4, 2)
-})
-input.onSound(DetectedSound.Loud, function () {
-    ZeileLoeschen(0, 2)
-})
-input.onButtonPressed(Button.A, function () {
-    ZeileLoeschen(3, 1)
-})
-function Level1Geschafft () {
-    SpielGesperrt = true
-    // Gutzeichen
-    basic.showIcon(IconNames.Yes)
-    basic.pause(2000)
-    // Das Dollarzeichen ($)
-    basic.showLeds(`
-        . # # # .
-        # . # . .
-        . # # # .
-        . . # . #
-        . # # # .
-        `)
-    music.playMelody("E G B C5 - - - - ", 300)
-    // 5 Sekunden warten vor Runde 2
-    basic.pause(5000)
-    // Reset für Level 2
-    AktuellesLevel = 2
-    ZeilenStatus = [
-    true,
-    true,
-    true,
-    true,
-    true
-    ]
-    // Alle Zeilen wieder an
-    SpielGesperrt = false
-    // Start-Animation für Level 2
-    basic.showString("2")
-    UpdateGraphik()
-}
-// Verhindert Eingaben während Animationen
-// --- Kern-Logik ---
-function ZeileLoeschen (ZeilenNummer: number, BenioetigtesLevel: number) {
-    // Eingabe nur verarbeiten, wenn wir im richtigen Level sind und keine Animation läuft
-    if (SpielGesperrt || AktuellesLevel != BenioetigtesLevel) {
-        return
-    }
-    // Wenn die Zeile noch da ist, löschen
-    if (ZeilenStatus[ZeilenNummer] == true) {
-        ZeilenStatus[ZeilenNummer] = false
-        // Sound-Feedback
-        music.playTone(523, music.beat(BeatFraction.Sixteenth))
-        UpdateGraphik()
-        // Prüfen, ob ALLE Zeilen gelöscht sind
-        if (!(ZeilenStatus.indexOf(true) >= 0)) {
-            if (AktuellesLevel == 1) {
-                Level1Geschafft()
-            } else if (AktuellesLevel == 2) {
-                Level2Geschafft()
-            }
-        }
-    }
-}
-input.onPinPressed(TouchPin.P2, function () {
-    ZeileLoeschen(2, 1)
-})
-input.onGesture(Gesture.Shake, function () {
-    ZeileLoeschen(1, 2)
-})
-function Level2Geschafft () {
-    SpielGesperrt = true
-    AktuellesLevel = 3
-    // Spiel vorbei
-    // Gutzeichen
-    basic.showIcon(IconNames.Yes)
-    basic.pause(1000)
-    // Der POKAL (Trophy)
-    basic.showLeds(`
-        # # # # #
-        . # # # .
-        . . # . .
-        . # # # .
-        # # # # #
-        `)
-    // Große Siegesfanfare
-    music.playMelody("G C5 E C5 G C5 E C5 ", 180)
-}
-input.onButtonPressed(Button.B, function () {
-    ZeileLoeschen(4, 1)
-})
-input.onPinPressed(TouchPin.P1, function () {
-    ZeileLoeschen(1, 1)
-})
+
+// --- Spiel-Zustände ---
+let AktuellesLevel = 1      // 1 = Tasten, 2 = Sensoren, 3 = Kompass/Logo, 4 = Defused, 5 = Detonated
+let Strikes = 0
+const MAX_STRIKES = 3
+const MAX_ZEIT = 120        // Maximale Startzeit in Sekunden
+let ZeitUebrig = 90         // Aktuelle Restzeit in Sekunden
 let SpielGesperrt = false
-let AktuellesLevel = 0
-let ZeilenStatus: boolean[] = []
-// Speichert, welche der 5 Zeilen sichtbar sind (True = an, False = gelöscht)
-ZeilenStatus = [
-true,
-true,
-true,
-true,
-true
-]
-// 1 = Erstes Spiel (Solid Logo), 2 = Zweites Spiel (Hohles Logo), 3 = Ende
-AktuellesLevel = 1
-// --- Start ---
-UpdateGraphik()
-basic.forever(function () {
-    if (input.compassHeading() < 10) {
-        ZeileLoeschen(2, 2)
+
+// Fortschritt in Level 1 (Tastensequenz: A -> B -> A+B -> A)
+let TastenSchritt = 0
+
+// Zeit-Tracking für Ticken
+let LetzterTick = 0
+
+// --- Start & Initialisierung ---
+function StartSpiel() {
+    AktuellesLevel = 1
+    Strikes = 0
+    ZeitUebrig = 90
+    TastenSchritt = 0
+    SpielGesperrt = false
+    LetzterTick = control.millis()
+    UpdateDisplay()
+}
+
+// --- Sichtbarer Countdown auf der 5x5 LED-Matrix ---
+function UpdateDisplay() {
+    if (SpielGesperrt) return
+    basic.clearScreen()
+
+    // 25 LEDs repräsentieren den Countdown
+    // Zeit proportional auf 25 LEDs umrechnen (max 120s = 25 LEDs)
+    let leuchtendeLeds = Math.clamp(0, 25, Math.ceil((ZeitUebrig / MAX_ZEIT) * 25))
+
+    for (let i = 0; i < leuchtendeLeds; i++) {
+        let x = i % 5
+        let y = Math.floor(i / 5)
+        led.plot(x, y)
+    }
+}
+
+// --- Zeit-Bonus gutschreiben ---
+function AddiereBonuszeit(sekunden: number) {
+    ZeitUebrig = Math.min(MAX_ZEIT, ZeitUebrig + sekunden)
+    music.playTone(988, 80) // Heller Bestätigungston
+    UpdateDisplay()
+}
+
+// --- Fehler- / Strike-Behandlung ---
+function RegistriereFehler() {
+    Strikes++
+    music.playTone(200, 300)
+    basic.showIcon(IconNames.No)
+    basic.pause(400)
+    ZeitUebrig = Math.max(3, ZeitUebrig - 15) // Zeitstrafe: -15s
+    if (Strikes >= MAX_STRIKES) {
+        Detoniere()
+    } else {
+        UpdateDisplay()
+    }
+}
+
+// --- Detonation ---
+function Detoniere() {
+    AktuellesLevel = 5
+    SpielGesperrt = true
+    music.playTone(130, 800)
+    basic.showIcon(IconNames.Skull)
+    music.playMelody("C5 B A G F E D C ", 300)
+    basic.showString("BOOM!")
+}
+
+// --- Erfolg / Entschärft ---
+function Entschaerft() {
+    AktuellesLevel = 4
+    SpielGesperrt = true
+    basic.showIcon(IconNames.Yes)
+    music.playMelody("C E G C5 C5 G E C ", 240)
+    basic.showString("DEFUSED!")
+}
+
+// --- Hintergrund-Schleife: Timer, Ticken & Countdown-Update ---
+control.inBackground(function () {
+    while (AktuellesLevel < 4) {
+        basic.pause(1000)
+        ZeitUebrig--
+
+        // Berechne Tick-Intervall abhängig von Restzeit:
+        // > 60s  -> alle 10 Sekunden
+        // 20-60s -> alle 5 Sekunden
+        // < 20s  -> alle 2 Sekunden
+        let tickIntervallMs = 10000
+        if (ZeitUebrig <= 20) {
+            tickIntervallMs = 2000
+        } else if (ZeitUebrig <= 60) {
+            tickIntervallMs = 5000
+        }
+
+        let jetzt = control.millis()
+        if (jetzt - LetzterTick >= tickIntervallMs) {
+            music.playTone(880, 25)
+            LetzterTick = jetzt
+        }
+
+        UpdateDisplay()
+
+        if (ZeitUebrig <= 0) {
+            Detoniere()
+            break
+        }
     }
 })
-basic.forever(function () {
-    if (input.lightLevel() < 10) {
-        ZeileLoeschen(2, 2)
+
+// --- Level 1: Tastensequenz (A -> B -> A+B -> A) ohne externe Drähte ---
+input.onButtonPressed(Button.A, function () {
+    if (AktuellesLevel != 1 || SpielGesperrt) return
+
+    if (TastenSchritt == 0) {
+        TastenSchritt = 1
+        AddiereBonuszeit(15) // Schritt 1 gelöst: +15s!
+    } else if (TastenSchritt == 3) {
+        TastenSchritt = 0
+        AddiereBonuszeit(20) // Level 1 abgeschlossen: +20s!
+        AktuellesLevel = 2
+        basic.showIcon(IconNames.Yes)
+        basic.pause(800)
+        UpdateDisplay()
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
     }
 })
+
+input.onButtonPressed(Button.B, function () {
+    if (AktuellesLevel != 1 || SpielGesperrt) return
+
+    if (TastenSchritt == 1) {
+        TastenSchritt = 2
+        AddiereBonuszeit(15) // Schritt 2 gelöst: +15s!
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
+    }
+})
+
+input.onButtonPressed(Button.AB, function () {
+    if (AktuellesLevel != 1 || SpielGesperrt) return
+
+    if (TastenSchritt == 2) {
+        TastenSchritt = 3
+        AddiereBonuszeit(15) // Schritt 3 gelöst: +15s!
+    } else {
+        TastenSchritt = 0
+        RegistriereFehler()
+    }
+})
+
+// --- Level 2: Sensoren (Dunkelheit + Lauter Sound, Erschütterungsverbot) ---
+input.onGesture(Gesture.Shake, function () {
+    if (AktuellesLevel == 2 && !SpielGesperrt) {
+        RegistriereFehler() // Bombe darf in Level 2 nicht geschüttelt werden!
+    }
+})
+
+input.onSound(DetectedSound.Loud, function () {
+    if (AktuellesLevel == 2 && !SpielGesperrt) {
+        if (input.lightLevel() < 15) {
+            // Richtig: Abgedunkelt UND geklatscht!
+            AddiereBonuszeit(25) // Level 2 gelöst: +25s!
+            AktuellesLevel = 3
+            basic.showIcon(IconNames.Yes)
+            basic.pause(800)
+            UpdateDisplay()
+        } else {
+            RegistriereFehler()
+        }
+    }
+})
+
+// --- Level 3: Kompass (Nord) + Touch-Logo ---
+let logoGedruecktDauer = 0
+basic.forever(function () {
+    if (AktuellesLevel == 3 && !SpielGesperrt) {
+        let heading = input.compassHeading()
+        let isNord = (heading < 15 || heading > 345)
+
+        if (isNord && input.logoIsPressed()) {
+            logoGedruecktDauer++
+            music.playTone(500 + logoGedruecktDauer * 120, 60)
+            if (logoGedruecktDauer >= 6) { // ca. 3 Sekunden gehalten
+                Entschaerft()
+            }
+        } else {
+            logoGedruecktDauer = 0
+        }
+        basic.pause(500)
+    }
+})
+
+// Start initialisieren
+StartSpiel()
