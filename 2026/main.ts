@@ -1,6 +1,12 @@
 /**
  * Globale Variablen
  */
+let SpielGesperrt = false
+let AktuellesLevel = 0
+let ZeilenStatus: boolean[] = [true, true, true, true, true]
+let HelligkeitZeile0 = 255
+let HelligkeitZeile2 = 255
+
 function UpdateGraphik () {
     basic.clearScreen()
     if (AktuellesLevel == 1) {
@@ -35,47 +41,79 @@ function UpdateGraphik () {
     } else if (AktuellesLevel == 2) {
         // LEVEL 2: Hohles Logo (Nur Punkte/Kontur)
         if (ZeilenStatus[0]) {
-            // Schütteln
-            led.plot(0, 0)
-            led.plot(2, 0)
+            // Zeile 0: Schallsensor (fade bis 0 / geloest)
+            led.plotBrightness(0, 0, HelligkeitZeile0)
+            led.plotBrightness(2, 0, HelligkeitZeile0)
         }
         // Lücke in der Mitte
         if (ZeilenStatus[1]) {
-            // A+B
+            // Zeile 1: Schütteln
             led.plot(1, 1)
             led.plot(3, 1)
         }
         if (ZeilenStatus[2]) {
-            // Links
-            led.plot(2, 2)
-            led.plot(4, 2)
+            // Zeile 2: Ausrichtung / Orientierung / Licht (fade bis 0 / geloest)
+            led.plotBrightness(2, 2, HelligkeitZeile2)
+            led.plotBrightness(4, 2, HelligkeitZeile2)
         }
         if (ZeilenStatus[3]) {
-            // Rechts
+            // Zeile 3: Rechts
             led.plot(1, 3)
             led.plot(3, 3)
         }
         if (ZeilenStatus[4]) {
-            // Kopfueber
+            // Zeile 4: Kopfueber / Logo
             led.plot(0, 4)
             led.plot(2, 4)
         }
     }
 }
+
+// --- Kern-Logik ---
+function ZeileLoeschen (ZeilenNummer: number, BenioetigtesLevel: number) {
+    // Eingabe nur verarbeiten, wenn wir im richtigen Level sind und keine Animation läuft
+    if (SpielGesperrt || AktuellesLevel != BenioetigtesLevel) {
+        return
+    }
+    // Wenn die Zeile noch da ist, löschen
+    if (ZeilenStatus[ZeilenNummer] == true) {
+        ZeilenStatus[ZeilenNummer] = false
+        if (ZeilenNummer == 0) {
+            HelligkeitZeile0 = 0
+        } else if (ZeilenNummer == 2) {
+            HelligkeitZeile2 = 0
+        }
+        // Sound-Feedback
+        music.playTone(523, music.beat(BeatFraction.Sixteenth))
+        UpdateGraphik()
+        // Prüfen, ob ALLE Zeilen gelöscht sind
+        if (!(ZeilenStatus.indexOf(true) >= 0)) {
+            if (AktuellesLevel == 1) {
+                Level1Geschafft()
+            } else if (AktuellesLevel == 2) {
+                Level2Geschafft()
+            }
+        }
+    }
+}
+
 // --- INPUTS LEVEL 1 (Pins & Buttons) ---
-// Nur wirksam in Level 1
 input.onPinPressed(TouchPin.P0, function () {
     ZeileLoeschen(0, 1)
 })
-input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    ZeileLoeschen(4, 2)
+input.onPinPressed(TouchPin.P1, function () {
+    ZeileLoeschen(1, 1)
 })
-input.onSound(DetectedSound.Loud, function () {
-    ZeileLoeschen(0, 2)
+input.onPinPressed(TouchPin.P2, function () {
+    ZeileLoeschen(2, 1)
 })
 input.onButtonPressed(Button.A, function () {
     ZeileLoeschen(3, 1)
 })
+input.onButtonPressed(Button.B, function () {
+    ZeileLoeschen(4, 1)
+})
+
 function Level1Geschafft () {
     SpielGesperrt = true
     // Gutzeichen
@@ -95,47 +133,32 @@ function Level1Geschafft () {
     // Reset für Level 2
     AktuellesLevel = 2
     ZeilenStatus = [
-    true,
-    true,
-    true,
-    true,
-    true
+        true,
+        true,
+        true,
+        true,
+        true
     ]
+    HelligkeitZeile0 = 255
+    HelligkeitZeile2 = 255
     // Alle Zeilen wieder an
     SpielGesperrt = false
     // Start-Animation für Level 2
     basic.showString("2")
     UpdateGraphik()
 }
-// Verhindert Eingaben während Animationen
-// --- Kern-Logik ---
-function ZeileLoeschen (ZeilenNummer: number, BenioetigtesLevel: number) {
-    // Eingabe nur verarbeiten, wenn wir im richtigen Level sind und keine Animation läuft
-    if (SpielGesperrt || AktuellesLevel != BenioetigtesLevel) {
-        return
-    }
-    // Wenn die Zeile noch da ist, löschen
-    if (ZeilenStatus[ZeilenNummer] == true) {
-        ZeilenStatus[ZeilenNummer] = false
-        // Sound-Feedback
-        music.playTone(523, music.beat(BeatFraction.Sixteenth))
-        UpdateGraphik()
-        // Prüfen, ob ALLE Zeilen gelöscht sind
-        if (!(ZeilenStatus.indexOf(true) >= 0)) {
-            if (AktuellesLevel == 1) {
-                Level1Geschafft()
-            } else if (AktuellesLevel == 2) {
-                Level2Geschafft()
-            }
-        }
-    }
-}
-input.onPinPressed(TouchPin.P2, function () {
-    ZeileLoeschen(2, 1)
-})
+
+// --- INPUTS LEVEL 2 (Sensoren & Gesten) ---
 input.onGesture(Gesture.Shake, function () {
     ZeileLoeschen(1, 2)
 })
+input.onSound(DetectedSound.Loud, function () {
+    ZeileLoeschen(0, 2)
+})
+input.onLogoEvent(TouchButtonEvent.Pressed, function () {
+    ZeileLoeschen(4, 2)
+})
+
 function Level2Geschafft () {
     SpielGesperrt = true
     AktuellesLevel = 3
@@ -154,34 +177,56 @@ function Level2Geschafft () {
     // Große Siegesfanfare
     music.playMelody("G C5 E C5 G C5 E C5 ", 180)
 }
-input.onButtonPressed(Button.B, function () {
-    ZeileLoeschen(4, 1)
-})
-input.onPinPressed(TouchPin.P1, function () {
-    ZeileLoeschen(1, 1)
-})
-let SpielGesperrt = false
-let AktuellesLevel = 0
-let ZeilenStatus: boolean[] = []
-// Speichert, welche der 5 Zeilen sichtbar sind (True = an, False = gelöscht)
-ZeilenStatus = [
-true,
-true,
-true,
-true,
-true
-]
+
 // 1 = Erstes Spiel (Solid Logo), 2 = Zweites Spiel (Hohles Logo), 3 = Ende
 AktuellesLevel = 1
-// --- Start ---
 UpdateGraphik()
+
+// Periodische Ueberpruefung und kontinuierliches Helligkeits-Fading fuer analoge Raetsel
 basic.forever(function () {
-    if (input.compassHeading() < 10) {
-        ZeileLoeschen(2, 2)
+    if (AktuellesLevel == 2 && !SpielGesperrt) {
+        let updateNoetig = false
+
+        // 1. Analoger Schallsensor (Zeile 0)
+        if (ZeilenStatus[0]) {
+            let sound = input.soundLevel()
+            // Schwellenwert fuer lauten Ton ist ca. 128
+            let neueHelligkeit0 = Math.clamp(0, 255, Math.floor(255 - (sound / 128) * 255))
+            if (neueHelligkeit0 < HelligkeitZeile0) {
+                HelligkeitZeile0 = neueHelligkeit0
+                updateNoetig = true
+            }
+            if (sound >= 128 || HelligkeitZeile0 <= 0) {
+                ZeileLoeschen(0, 2)
+            }
+        }
+
+        // 2. Analoge Orientierung / Kompass & Lichtsensor (Zeile 2)
+        if (ZeilenStatus[2]) {
+            let heading = input.compassHeading()
+            let diffKompass = Math.min(heading, 360 - heading)
+            // Je naeher an 0 Grad (Nord), desto dunkler
+            let helligkeitKompass = Math.clamp(0, 255, Math.floor((diffKompass / 90) * 255))
+
+            let light = input.lightLevel()
+            // Je dunkler (Licht abdecken), desto dunkler
+            let helligkeitLicht = Math.clamp(0, 255, Math.floor((light / 100) * 255))
+
+            // Kombination aus beiden analogen Bedingungen (minimaler Helligkeitswert)
+            let zielHelligkeit2 = Math.min(helligkeitKompass, helligkeitLicht)
+            if (zielHelligkeit2 != HelligkeitZeile2) {
+                HelligkeitZeile2 = zielHelligkeit2
+                updateNoetig = true
+            }
+
+            if (diffKompass < 10 || light < 10 || HelligkeitZeile2 <= 0) {
+                ZeileLoeschen(2, 2)
+            }
+        }
+
+        if (updateNoetig) {
+            UpdateGraphik()
+        }
     }
-})
-basic.forever(function () {
-    if (input.lightLevel() < 10) {
-        ZeileLoeschen(2, 2)
-    }
+    basic.pause(50)
 })
