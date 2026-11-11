@@ -80,7 +80,54 @@ Das Spiel besteht aus **2 Sicherheitsstufen (Levels)** mit jeweils 4 Sicherungsl
      * Nach einem weiteren kurzen Loslassen schaltet das **dritte Halten (0,8 Sekunden)** Zeile 3 aus.
   2. **Zeile 4 (Lichtsensor oder Tasten A / B):**
      * Das Display wird mit der flachen Hand abgedunkelt (`lightLevel <= 20`), wodurch Zeile 4 sanft ausfadet, **oder** es wird direkt **Taste A** bzw. **Taste B** gedrückt.
-- **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Dollar-Zeichen (`$`)**, Siegesmelodie und nach 5 Sekunden Pause der Start von Level `"2"`.  ---  ### 3.2 Level 2: Akustik, Kinetik, Optik & Neigung - **Thema:** Vier unterschiedliche physikalische Umgebungssensoren müssen durch Annäherung an ihren jeweiligen Schwellenwert deaktiviert werden. - **Sichtbarer Countdown:** Zeile 0 startet wieder mit 5 Pixeln (30 Sekunden) und blinkendem rechten Randpixel. - **Aufgabe & Mechanik (Reihenfolge frei wählbar):** 1. **Zeile 1 – Akustik-Sicherung (Mikrofon):** Laut klatschen oder rufen. Die Linie wird mit steigendem Schallpegel dunkler und erlischt ab `soundLevel >= 128`. 2. **Zeile 2 – Kinetik-Sicherung (Beschleunigung):** Den micro:bit kräftig **schütteln** (`Gesture.Shake` bzw. Gesamtbeschleunigung `>= 2000 mg`). 3. **Zeile 3 – Optik-Sicherung (Helligkeit):** Das Display ins helle Licht halten oder mit einer Lampe anleuchten (`lightLevel >= 220`). 4. **Zeile 4 – Lage-Sicherung (Neigung / Touch):** Den micro:bit **nach rechts neigen** (`TiltRight` bzw. X-Beschleunigung `>= 700 mg`, Linie fadet beim Neigen sanft aus) oder das **Touch-Logo** drücken. - **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Pokal-Symbol (Trophy)** und große Siegesfanfare!  ---  ## ⏱️ 4. Feedback- und Timer-System  ### 4.1 Der sichtbare LED-Countdown (Zeile 0) - **30 Sekunden pro Level:** Jedes der 5 Pixel in der obersten Zeile (`y = 0`) steht für 6 Sekunden Spielzeit. - **Blinkendes Grenzpixel:** Alle links liegenden Zeit-Pixel leuchten dauerhaft mit voller Kraft (`255`). Das jeweils rechteste aktive Pixel (zu Beginn `x = 4` oben rechts) **blinkt im 250-ms-Takt** zwischen hell (`255`) und gedimmt (`20`), weil es als Nächstes erlischt. - **Zeitablauf (Timeout):** Erreicht der Countdown 0 Sekunden, erscheint ein `X` (`IconNames.No`), eine absteigende Melodie ertönt, und das aktuelle Level startet automatisch neu.  ### 4.2 Kontinuierliches Distanz-Fading (Zeilen 1 bis 4) - Alle ungelösten Zeilen starten als durchgehende waagrechte Linien (alle 5 LEDs der Zeile leuchten mit `255`). - Sobald ein Sensorwert in Richtung des Zielwerts verändert wird, berechnet die Hauptschleife alle `50 ms` die verbleibende Distanz zum Schwellenwert und reduziert die PWM-Helligkeit (`led.plotBrightness`) der gesamten Linie proportional von `255` bis `0`.  ---  ## 📜 5. Handbuch des Bombenexperten (Vorlage für die Mitspieler)  > Die Experten sitzen mit dem Handbuch bereit. Auf dem micro:bit leuchten zu Beginn **5 durchgehende waagrechte Linien**!  ### ⚠️ Grundregeln 1. **Die oberste Linie (Zeile 0) ist eure Zeit (30 Sekunden):** Das jeweils **letzte Pixel rechts blinkt**, weil es als Nächstes erlischt. Sind alle 5 Pixel oben aus, startet das Level neu! 2. **Die 4 Linien darunter (Zeilen 1 bis 4) sind die Sicherungen:** Wenn ihr auf der richtigen Spur seid, **wird die jeweilige Linie immer dunkler (Fading)**, bis sie mit einem Piepton ganz verschwindet!  ---  ### 1️⃣ Level 1: Die Biometrie- & Tasten-Freigabe - **Sicherungen 1, 2 und 3 (Die oberen drei Rätsel-Linien):** * Legt einen Finger auf das **goldene Gesicht (Touch-Logo)** oben in der Mitte und **haltet es für knapp 1 Sekunde (0,8 s) gedrückt**. * Ihr seht live, wie **Linie 1** immer dunkler wird und mit einem Ton erlischt! * **Lasst das Gesicht kurz los** und haltet es **zum 2. Mal gedrückt**, bis **Linie 2** ausgeblendet ist. * **Lasst erneut kurz los** und haltet es **zum 3. Mal gedrückt**, bis auch **Linie 3** erlischt! - **Sicherung 4 (Die unterste Linie):** * Deckt das Display mit der Hand ab (**Abdunkeln** – die Linie fadet mit zunehmender Dunkelheit aus) **ODER** drückt auf **Taste A** bzw. **Taste B**. - **Level-Erfolg:** Es erscheinen das Häkchen und das **Dollar-Zeichen (`$`)**, danach startet Runde `"2"`.
+- **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Dollar-Zeichen (`$`)**, Siegesmelodie und nach 5 Sekunden Pause der Start von Level `"2"`.
+
+---
+
+### 3.2 Level 2: Akustik, Kinetik, Optik & Neigung
+- **Thema:** Vier unterschiedliche physikalische Umgebungssensoren müssen durch Annäherung an ihren jeweiligen Schwellenwert deaktiviert werden.
+- **Sichtbarer Countdown:** Zeile 0 startet wieder mit 5 Pixeln (30 Sekunden) und blinkendem rechten Randpixel.
+- **Aufgabe & Mechanik (Reihenfolge frei wählbar):**
+  1. **Zeile 1 – Akustik-Sicherung (Mikrofon):** Laut klatschen oder rufen. Die Linie wird mit steigendem Schallpegel dunkler und erlischt ab `soundLevel >= 128`.
+  2. **Zeile 2 – Kinetik-Sicherung (Beschleunigung):** Den micro:bit kräftig **schütteln** (`Gesture.Shake` bzw. Gesamtbeschleunigung `>= 2000 mg`).
+  3. **Zeile 3 – Optik-Sicherung (Helligkeit):** Das Display ins helle Licht halten oder mit einer Lampe anleuchten (`lightLevel >= 220`).
+  4. **Zeile 4 – Lage-Sicherung (Neigung / Touch):** Den micro:bit **nach rechts neigen** (`TiltRight` bzw. X-Beschleunigung `>= 700 mg`, Linie fadet beim Neigen sanft aus) oder das **Touch-Logo** drücken.
+- **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Pokal-Symbol (Trophy)** und große Siegesfanfare!
+
+---
+
+## ⏱️ 4. Feedback- und Timer-System
+
+### 4.1 Der sichtbare LED-Countdown (Zeile 0)
+- **30 Sekunden pro Level:** Jedes der 5 Pixel in der obersten Zeile (`y = 0`) steht für 6 Sekunden Spielzeit.
+- **Blinkendes Grenzpixel:** Alle links liegenden Zeit-Pixel leuchten dauerhaft mit voller Kraft (`255`). Das jeweils rechteste aktive Pixel (zu Beginn `x = 4` oben rechts) **blinkt im 250-ms-Takt** zwischen hell (`255`) und gedimmt (`20`), weil es als Nächstes erlischt.
+- **Zeitablauf (Timeout):** Erreicht der Countdown 0 Sekunden, erscheint ein `X` (`IconNames.No`), eine absteigende Melodie ertönt, und das aktuelle Level startet automatisch neu.
+
+### 4.2 Kontinuierliches Distanz-Fading (Zeilen 1 bis 4)
+- Alle ungelösten Zeilen starten als durchgehende waagrechte Linien (alle 5 LEDs der Zeile leuchten mit `255`).
+- Sobald ein Sensorwert in Richtung des Zielwerts verändert wird, berechnet die Hauptschleife alle `50 ms` die verbleibende Distanz zum Schwellenwert und reduziert die PWM-Helligkeit (`led.plotBrightness`) der gesamten Linie proportional von `255` bis `0`.
+
+---
+
+## 📜 5. Handbuch des Bombenexperten (Vorlage für die Mitspieler)
+
+> Die Experten sitzen mit dem Handbuch bereit. Auf dem micro:bit leuchten zu Beginn **5 durchgehende waagrechte Linien**!
+
+### ⚠️ Grundregeln
+1. **Die oberste Linie (Zeile 0) ist eure Zeit (30 Sekunden):** Das jeweils **letzte Pixel rechts blinkt**, weil es als Nächstes erlischt. Sind alle 5 Pixel oben aus, startet das Level neu!
+2. **Die 4 Linien darunter (Zeilen 1 bis 4) sind die Sicherungen:** Wenn ihr auf der richtigen Spur seid, **wird die jeweilige Linie immer dunkler (Fading)**, bis sie mit einem Piepton ganz verschwindet!
+
+---
+
+### 1️⃣ Level 1: Die Biometrie- & Tasten-Freigabe
+- **Sicherungen 1, 2 und 3 (Die oberen drei Rätsel-Linien):**
+  * Legt einen Finger auf das **goldene Gesicht (Touch-Logo)** oben in der Mitte und **haltet es für knapp 1 Sekunde (0,8 s) gedrückt**.
+  * Ihr seht live, wie **Linie 1** immer dunkler wird und mit einem Ton erlischt!
+  * **Lasst das Gesicht kurz los** und haltet es **zum 2. Mal gedrückt**, bis **Linie 2** ausgeblendet ist.
+  * **Lasst erneut kurz los** und haltet es **zum 3. Mal gedrückt**, bis auch **Linie 3** erlischt!
+- **Sicherung 4 (Die unterste Linie):**
+  * Deckt das Display mit der Hand ab (**Abdunkeln** – die Linie fadet mit zunehmender Dunkelheit aus) **ODER** drückt auf **Taste A** bzw. **Taste B**.
+- **Level-Erfolg:** Es erscheinen das Häkchen und das **Dollar-Zeichen (`$`)**, danach startet Runde `"2"`.
 
 ---
 
@@ -282,6 +329,7 @@ basic.forever(function () {
                             LogoDruckStart = input.runningTime()
                         }
                         let halteDauer = input.runningTime() - LogoDruckStart
+                        // Fading proportional zur Haltedauer bis LOGO_FADE_DAUER_MS (800ms)
                         ZeilenHelligkeit[aktiveLogoZeile] = Math.constrain(
                             Math.floor(((LOGO_FADE_DAUER_MS - halteDauer) / LOGO_FADE_DAUER_MS) * 255),
                             0,
@@ -289,11 +337,13 @@ basic.forever(function () {
                         )
                         if (halteDauer >= LOGO_FADE_DAUER_MS) {
                             ZeileLoeschen(aktiveLogoZeile, 1)
+                            // Erzwingt kurzes Loslassen vor der nächsten Linie (1 -> 2 -> 3)
                             WarteAufLogoLoslassen = true
                             LogoWarGedrueckt = false
                         }
                     }
                 } else {
+                    // Gesicht losgelassen -> Falls noch nicht gelöst, Helligkeit wieder auf 255 und bereit für nächste Zeile
                     LogoWarGedrueckt = false
                     WarteAufLogoLoslassen = false
                     if (ZeilenStatus[aktiveLogoZeile]) {
@@ -302,7 +352,7 @@ basic.forever(function () {
                 }
             }
 
-            // Zeile 4: Lichtsensor (Ziel <= 20, oder Taste A/B drücken)
+            // Zeile 4: Lichtsensor (Simulator startet bei 128 -> Ziel <= 20, oder Taste A/B drücken)
             if (ZeilenStatus[4]) {
                 let light1 = input.lightLevel()
                 ZeilenHelligkeit[4] = Math.constrain(Math.floor(((light1 - 20) / 108) * 255), 0, 255)
@@ -310,25 +360,25 @@ basic.forever(function () {
             }
         } else if (AktuellesLevel == 2) {
             // LEVEL 2: Analoge Sensoren
-            // Zeile 1: Schallsensor (Ziel >= 128)
+            // Zeile 1: Schallsensor (Start 0 -> Ziel >= 128)
             if (ZeilenStatus[1]) {
                 let sound = input.soundLevel()
                 ZeilenHelligkeit[1] = Math.constrain(Math.floor(((128 - sound) / 128) * 255), 0, 255)
                 if (sound >= 128) ZeileLoeschen(1, 2)
             }
-            // Zeile 2: Beschleunigung / Schütteln (Ziel >= 2000 mg)
+            // Zeile 2: Beschleunigung / Schütteln (Start ~1000 mg -> Ziel >= 2000 mg)
             if (ZeilenStatus[2]) {
                 let acc = input.acceleration(Dimension.Strength)
                 ZeilenHelligkeit[2] = Math.constrain(Math.floor(((2000 - acc) / 1000) * 255), 0, 255)
                 if (acc >= 2000) ZeileLoeschen(2, 2)
             }
-            // Zeile 3: Lichtstärke erhöhen (Ziel >= 220)
+            // Zeile 3: Lichtstärke erhöhen (Start 128 -> Ziel >= 220)
             if (ZeilenStatus[3]) {
                 let light2 = input.lightLevel()
                 ZeilenHelligkeit[3] = Math.constrain(Math.floor(((220 - light2) / 92) * 255), 0, 255)
                 if (light2 >= 220) ZeileLoeschen(3, 2)
             }
-            // Zeile 4: Neigung nach rechts / X-Achse (Ziel >= 700 mg oder Logo drücken)
+            // Zeile 4: Neigung nach rechts / X-Achse (Start 0 -> Ziel >= 700 mg oder Logo drücken)
             if (ZeilenStatus[4]) {
                 let tiltX = Math.max(0, input.acceleration(Dimension.X))
                 ZeilenHelligkeit[4] = Math.constrain(Math.floor(((700 - tiltX) / 700) * 255), 0, 255)
