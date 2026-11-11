@@ -1,412 +1,352 @@
 # 💣 Spielkonzept: "Die Zeitbombe" (Defuse the Bomb)
-> Ein interaktives Rätselspiel für den BBC micro:bit – analog zum Tresor-Rätsel für den Zukunftstag / MINT-Workshops.
+> Ein interaktives Rätselspiel für den BBC micro:bit v2 – mit 5 durchgehenden LED-Linien, blinkendem Countdown und analogem Distanz-Fading für den Zukunftstag / MINT-Workshops.
 
 ---
 
 ## 🎯 1. Übersicht & Spielidee
 
 ### 1.1 Das Szenario
-Die Teilnehmenden schlüpfen in die Rolle eines Bombenentschärfungs-Teams (angelehnt an das beliebte Koop-Konzept von *„Keep Talking and Nobody Explodes“*).
-Eine tickende „Zeitbombe“ (micro:bit) muss innerhalb eines Zeitlimits durch Lösen aufeinanderfolgender Sicherheitsmodule entschärft werden.
-Das gesamte Spiel funktioniert **völlig autark ohne externe Drähte oder Zubehör** – alle Eingaben erfolgen rein über die On-Board-Tasten, Gesten und Sensoren des micro:bit!
+Die Teilnehmenden schlüpfen in die Rolle eines Bombenentschärfungs-Teams (angelehnt an das Koop-Konzept von *„Keep Talking and Nobody Explodes“*).
+Eine tickende „Zeitbombe“ (micro:bit v2) zeigt nach dem Start **fünf waagrechte, durchgehende Linien** auf dem 5x5-LED-Display.
+- **Zeile 0 (ganz oben):** Der 30-Sekunden-Countdown. Das jeweils letzte aktive Pixel rechts **blinkt rhythmisch**, bevor es erlischt.
+- **Zeilen 1 bis 4 (darunter):** Vier aktive Sicherheitsleitungen (Rätsel-Schritte). Sobald sich die Spielenden mit dem richtigen Sensor dem Zielwert nähern, **blenden (faden) die Linien stufenlos aus**, bis sie bei Erreichen des Zielwerts mit einem Quittungston komplett erlöschen!
 
-Fehler lösen entweder **Strikes** (Strafzeit) oder die sofortige **Detonation** aus. Doch Teamwork zahlt sich aus: **Jeder gelöste Teilschritt belohnt das Team mit wertvoller Bonus-Restzeit!**
+Das gesamte Spiel funktioniert **völlig autark ohne externe Drähte oder Zubehör** – alle Eingaben erfolgen rein über das kapazitive Touch-Logo („Gesicht“), die Tasten A/B, den Licht-, Schall- und Beschleunigungssensor des micro:bit v2!
 
-### 1.2 Warum analog zum Tresor?
-Wie beim **Tresor-Rätsel** (`2025/main.ts` und `LOESUNG.md`) basiert das Spiel auf:
-* **Mehrstufigem Ablauf (3 Phasen / Levels):**
-  1. *Level 1: Tasten- & Eingabesequenz* – Entschärfung über die kombinierte Tasteneingabe **A+B** am Board.
-  2. *Level 2: Umweltsensoren & Erschütterung* – Vorsichtige Handhabung, Lichtsensor, Sound & ruhige Hand.
-  3. *Level 3: Das Finale / Der Entschärfungscode* – Kombination aus Ausrichtung (Kompass) und kapazitiver Logo-Bestätigung.
-* **Klarem visuellem & auditivem Feedback:**
-  * Der **Countdown wird permanent in der obersten Zeile** (von 10 auf 0 Pixel/Schritte) angezeigt. Das nächste Pixel, das verschwinden wird, **blinkt** dabei rhythmisch.
-  * Das **Ticken** passt sich der Dringlichkeit an (zuerst alle 10s, dann 5s und am Schluss alle 2s).
-* **Didaktischem Mehrwert:** Spielerisches Erkunden aller Sensoren des micro:bit ohne Aufbau-Aufwand (Plug & Play).
-
----
-
-## 🔍 2. Übersicht aller micro:bit Möglichkeiten (Hardware & Features)
-
-Der micro:bit bietet vielfältige Ein- und Ausgabemöglichkeiten – komplett ohne externe Verkabelung:
-
-| Kategorie | Sensor / Feature | Verfügbarkeit | Erkennbare Aktionen / Werte | Einsatzmöglichkeit im Bomben-Rätsel |
-| :--- | :--- | :--- | :--- | :--- |
-| **Tasten / Touch** | **Taste A & B** | v1 & v2 | Gleichzeitig gedrückt (**nur kombinierte A+B Eingabe**) | **Deaktivierung / Entschärfung:**<br>• Reine **A+B** Eingabe (beide Tasten gleichzeitig gedrückt)<br>• Quittierung & Entsicherung. |
-| | **Touch-Logo** | v2 | Berührt (Touch), Losgelassen, Lang gedrückt | Kapazitiver Fingerabdruck-Sensor / biometrische Freigabe; Not-Aus-Schalter. |
-| **Bewegung & Lage** | **Beschleunigungssensor (Accelerometer)** | v1 & v2 | Gesten: Schütteln, Neigen (Links/Rechts, Vor/Zurück), Bildschirm oben/unten (Face Up/Down) | **Erschütterungssensor:**<br>• *Ruhige Hand:* Schütteln oder ruckartiges Bewegen löst Strikes aus!<br>• Lage-Rätsel: Bombe muss vorsichtig gehalten werden. |
-| **Orientierung** | **Kompass (Magnetometer)** | v1 & v2 | Magnetische Himmelsrichtung (0–359°) | **Orientierungs-Rätsel:** Bombe muss exakt nach Norden ausgerichtet werden, um das Magnetventil zu blockieren. |
-| **Akustik** | **Mikrofon (Sound Sensor)** | v2 | Lautes Geräusch (Loud Sound), Schallpegel (0–255) | **Schallsensor-Zünder:**<br>• Akustischer Impuls: Gezieltes Klatschen zum Überbrücken eines Relais.<br>• *Lärmverbot:* Bei zu lautem Geschrei tickt die Uhr schneller. |
-| | **Integrierter Lautsprecher & Summer** | v2 (Speaker), v1 (via Pin 0/Kopfhörer) | Töne, Melodien, Frequenzen, Ticks | • **Dynamisches Ticken:** Zuerst alle 10s, dann alle 5s, am Schluss alle 2s.<br>• Warntöne / Alarmsirene<br>• Detonationsgeräusch vs. Siegesfanfare. |
-| **Optik** | **Lichtsensor** | v1 & v2 (über LED-Matrix gemessen) | Helligkeit / Lichtstärke (0–255) | **Optischer Zünder / Lichtschranke:**<br>• Sensor muss abgedunkelt werden (Hand auflegen), um Laserstrahl zu unterbrechen. |
-| | **5x5 LED-Display** | v1 & v2 | 25 rote LEDs mit Helligkeitsstufen | • **Sichtbarer Countdown:** Countdown in der obersten Zeile (von 10 auf 0 Pixel/Schritte), nächstes verschwindendes Pixel blinkt.<br>• Fehleranzeige (Strike-Symbol `X`).<br>• End-Animationen (Totenkopf `Skull` vs. Häkchen `Yes`). |
-| **Umwelt** | **Temperatursensor** | v1 & v2 | Chiptemperatur in °C | Optional: Thermische Sperre durch Handwärme. |
+### 1.2 Aufbau & Ablauf (Das 2-Level-Konzept)
+- **Mehrstufiger Ablauf (2 Phasen / Levels à 30 Sekunden):**
+  1. *Level 1: Biometrie & Lichtschranke* – Dreifache sequenzielle Freigabe über das **goldene Gesicht (Touch-Logo)** mit Halte-Fading (für die Linien 1, 2 und 3) sowie Unterbrechen der Lichtschranke bzw. Tasten **A / B** (für Linie 4).
+  2. *Level 2: Akustik, Kinetik & Lage* – Kombination aus **Schallsensor** (Linie 1), **Schütteln / Beschleunigung** (Linie 2), **Lichtquelle** (Linie 3) und **Rechtsneigung / Logo** (Linie 4).
+- **Klares visuelles & auditives Feedback:**
+  * **Sichtbarer Countdown in Zeile 0:** 5 LEDs repräsentieren je 6 Sekunden (gesamt 30s pro Level). Das jeweils rechteste aktive Pixel blinkt im 250-ms-Takt.
+  * **Analoges Distanz-Fading (Zeilen 1–4):** Alle vier Rätsel-Linien leuchten beim Start voll (`Helligkeit 255`) und werden proportional zur Annäherung an die Lösung dunkler (`0` = gelöst).
+  * **Belohnungs-Sequenzen:** Nach Level 1 erscheint das Häkchen und das **Dollar-Symbol (`$`)** mit Melodie; nach Level 2 erscheint der **Pokal (Trophy)** mit großer Siegesfanfare. Läuft die Zeit ab, erscheint das `X`-Symbol und das aktuelle Level startet neu.
+- **Didaktischer Mehrwert:** Spielerisches Erkunden aller analogen und digitalen Sensoren des micro:bit ohne Aufbau-Aufwand (Plug & Play).
 
 ---
 
-## 🧩 3. Detailliertes Rätsel- & Level-Design (Das 3-Phasen-Konzept)
+## 🔍 2. Übersicht aller genutzten micro:bit Features (Hardware & Sensor-Mapping)
 
-Das Spiel besteht aus **3 Sicherheitsstufen (Levels)**, die nacheinander gelöst werden müssen, bevor der Timer abläuft.
+| Zeile / Funktion | Level 1 (Biometrie & Tasten) | Level 2 (Umwelt & Bewegung) | Analoge Fading-Logik (Helligkeit 255 ➔ 0) |
+| :--- | :--- | :--- | :--- |
+| **Zeile 0 (Oben)** | **Countdown-Timer (30s)** | **Countdown-Timer (30s)** | 5 Pixel (je 6s). Links dauerhaft an (`255`), das **letzte aktive Pixel rechts blinkt** (`255` ↔ `20`), bis es verschwindet. |
+| **Zeile 1** | **Touch-Logo („Gesicht“) – 1. Mal halten** | **Schallsensor (Mikrofon)** | **L1:** 800 ms gedrückt halten fadet Zeile 1 von `255` auf `0`.<br>**L2:** Schallpegel `0..128` fadet Zeile 1 bis zur Auslösung (`>= 128`). |
+| **Zeile 2** | **Touch-Logo („Gesicht“) – 2. Mal halten** | **Beschleunigung / Schütteln** | **L1:** Nach kurzem Loslassen erneut 800 ms halten fadet Zeile 2 aus.<br>**L2:** Beschleunigung (`1000..2000 mg` / `Shake`) fadet Zeile 2 aus. |
+| **Zeile 3** | **Touch-Logo („Gesicht“) – 3. Mal halten** | **Lichtsensor (Beleuchten)** | **L1:** Nach kurzem Loslassen zum 3. Mal 800 ms halten fadet Zeile 3 aus.<br>**L2:** Helligkeit erhöhen (`128..220`) fadet Zeile 3 aus. |
+| **Zeile 4 (Unten)** | **Lichtsensor (Abdunkeln) ODER Taste A / B** | **Neigung nach rechts (`TiltRight`) ODER Logo** | **L1:** Abdunkeln (`128..20`) fadet Zeile 4 sanft aus; Klick auf **A** oder **B** löscht sofort.<br>**L2:** Neigung X-Achse (`0..700 mg`) fadet Zeile 4 aus; `TiltRight` / Logo löscht sofort. |
 
-```
-       [ START: BOMBE AKTIVIERT ]
-                   │
-                   ▼
-  ┌─────────────────────────────────┐
-  │   LEVEL 1: Die A+B Deaktivierung│ ➔ Nur kombinierte Taste A+B verwenden!
-  │   (Keine Drähte nötig!)         │   Erfolgreiche Eingabe gibt Bonuszeit!
-  └─────────────────────────────────┘
-                   │  Erfolg (Level 1 cleared) + Bonuszeit
-                   ▼
-  ┌─────────────────────────────────┐
-  │   LEVEL 2: Sensoren & Umwelt    │ ➔ Dunkelheit (Lichtsensor) + Klatschen.
-  │   (Licht, Sound, Erschütterung) │   Erschütterung (Shake) gibt Strike!
-  └─────────────────────────────────┘   Erfolg belohnt mit Bonuszeit (+20s)!
-                   │  Erfolg (Level 2 cleared)
-                   ▼
-  ┌─────────────────────────────────┐
-  │   LEVEL 3: Der Finale Code      │ ➔ Nach Norden ausrichten (Kompass)
-  │   (Ausrichtung & Touch-Logo)    │   + Logo 3 Sekunden gedrückt halten.
-  └─────────────────────────────────┘
-                   │
-      ┌────────────┴────────────┐
-      ▼                         ▼
-[ 🏆 DEFUSED! ]         [ 💥 BOOM! ]
-(Alle Level geschafft)  (Zeit abgelaufen / 3 Strikes)
+---
+
+## 🧩 3. Detailliertes Rätsel- & Level-Design (Das 2-Phasen-Konzept)
+
+Das Spiel besteht aus **2 Sicherheitsstufen (Levels)** mit jeweils 4 Sicherungslinien, die innerhalb von 30 Sekunden pro Level gelöst werden müssen.
+
+```text
+       [ START: 5 DURCHGEHENDE LINIEN LEUCHTEN ]
+       (Zeile 0 = Countdown, rechtes Pixel blinkt)
+                          │
+                          ▼
+  ┌───────────────────────────────────────────────┐
+  │ LEVEL 1 (30s): Biometrie & Lichtschranke      │
+  │ • Zeilen 1, 2, 3: 3x Gesicht für 0.8s halten  │
+  │ • Zeile 4: Abdunkeln (<= 20) oder Taste A / B │
+  └───────────────────────────────────────────────┘
+                          │ Alle 4 Linien erloschen!
+                          │ ➔ Häkchen + Dollar ($) + Melodie
+                          ▼
+  ┌───────────────────────────────────────────────┐
+  │ LEVEL 2 (30s): Umwelt- & Bewegungssensoren    │
+  │ • Zeile 1: Laut klatschen / rufen (Sound>=128)│
+  │ • Zeile 2: Kräftig schütteln (Acc >= 2000 mg) │
+  │ • Zeile 3: Licht auf Display (Light >= 220)   │
+  │ • Zeile 4: Nach rechts neigen (X >= 700 mg)   │
+  └───────────────────────────────────────────────┘
+                          │
+            ┌─────────────┴─────────────┐
+            ▼                           ▼
+   [ 🏆 POKAL & FANFARE ]      [ ❌ ZEIT ABGELAUFEN ]
+   (Alle Linien in L2 gelöst)  (Countdown = 0 ➔ Level-Reset)
 ```
 
 ---
 
-### 3.1 Level 1: Die Tasten-Deaktivierung (Nur kombinierte A+B Eingabe!)
-* **Thema:** Deaktivierung der digitalen Sicherheitsrelais über die kombinierte Tasteneingabe **A+B** am Board.
-* **Sichtbarer Countdown & Status:** Die oberste LED-Zeile zeigt permanent den Countdown von 10 auf 0 Pixel/Stufen an. Das nächste Pixel, das erlischt, blinkt rhythmisch.
-* **Aufgabe & Mechanik:**
-  * Es wird **ausschließlich die kombinierte A+B Eingabe** (beide Tasten gleichzeitig gedrückt) verwendet!
-  * Einzelne Betätigungen von Taste A oder Taste B allein werden ignoriert oder lösen keine Deaktivierung aus – nur das synchrone Drücken von **A+B** schaltet das Relais.
-  * Das Team muss die kombinierte A+B Deaktivierung gezielt auslösen.
-  * **Belohnungs-Mechanik (Zeit-Bonus):** Das erfolgreiche Ausführen der A+B Kombination belohnt das Team mit **+20 Sekunden Bonuszeit** und einem Quittungston!
-* **Erfolgs-Feedback:** Bestätigungsmelodie, **+20 Sekunden Bonus**, automatischer Wechsel zu Level 2.
+### 3.1 Level 1: Biometrie (Gesicht-Touch) & Lichtschranke / Tasten
+- **Thema:** Sequenzielle Deaktivierung der oberen drei Sicherheitsrelais über den biometrischen Fingerabdruck-Scanner (Touch-Logo) und Unterbrechung der unteren Lichtschranke.
+- **Sichtbarer Countdown & Status:** Zeile 0 zeigt die 5 Countdown-Pixel (30 Sekunden). Das rechteste aktive Pixel blinkt im 250-ms-Rhythmus.
+- **Aufgabe & Mechanik:**
+  1. **Zeilen 1, 2 und 3 (Touch-Logo / Gesicht):**
+     * Der Finger muss auf das **goldene Gesicht (Logo)** gelegt und für **0,8 Sekunden (800 ms)** gehalten werden. Während des Haltens blendet Zeile 1 sichtbar bis auf `0` aus und erlischt mit einem Ton.
+     * Danach muss das Gesicht kurz losgelassen und **erneut für 0,8 Sekunden gehalten** werden, um Zeile 2 auszublenden.
+     * Nach einem weiteren kurzen Loslassen schaltet das **dritte Halten (0,8 Sekunden)** Zeile 3 aus.
+  2. **Zeile 4 (Lichtsensor oder Tasten A / B):**
+     * Das Display wird mit der flachen Hand abgedunkelt (`lightLevel <= 20`), wodurch Zeile 4 sanft ausfadet, **oder** es wird direkt **Taste A** bzw. **Taste B** gedrückt.
+- **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Dollar-Zeichen (`$`)**, Siegesmelodie und nach 5 Sekunden Pause der Start von Level `"2"`.  ---  ### 3.2 Level 2: Akustik, Kinetik, Optik & Neigung - **Thema:** Vier unterschiedliche physikalische Umgebungssensoren müssen durch Annäherung an ihren jeweiligen Schwellenwert deaktiviert werden. - **Sichtbarer Countdown:** Zeile 0 startet wieder mit 5 Pixeln (30 Sekunden) und blinkendem rechten Randpixel. - **Aufgabe & Mechanik (Reihenfolge frei wählbar):** 1. **Zeile 1 – Akustik-Sicherung (Mikrofon):** Laut klatschen oder rufen. Die Linie wird mit steigendem Schallpegel dunkler und erlischt ab `soundLevel >= 128`. 2. **Zeile 2 – Kinetik-Sicherung (Beschleunigung):** Den micro:bit kräftig **schütteln** (`Gesture.Shake` bzw. Gesamtbeschleunigung `>= 2000 mg`). 3. **Zeile 3 – Optik-Sicherung (Helligkeit):** Das Display ins helle Licht halten oder mit einer Lampe anleuchten (`lightLevel >= 220`). 4. **Zeile 4 – Lage-Sicherung (Neigung / Touch):** Den micro:bit **nach rechts neigen** (`TiltRight` bzw. X-Beschleunigung `>= 700 mg`, Linie fadet beim Neigen sanft aus) oder das **Touch-Logo** drücken. - **Erfolgs-Feedback:** Häkchen (`IconNames.Yes`), **Pokal-Symbol (Trophy)** und große Siegesfanfare!  ---  ## ⏱️ 4. Feedback- und Timer-System  ### 4.1 Der sichtbare LED-Countdown (Zeile 0) - **30 Sekunden pro Level:** Jedes der 5 Pixel in der obersten Zeile (`y = 0`) steht für 6 Sekunden Spielzeit. - **Blinkendes Grenzpixel:** Alle links liegenden Zeit-Pixel leuchten dauerhaft mit voller Kraft (`255`). Das jeweils rechteste aktive Pixel (zu Beginn `x = 4` oben rechts) **blinkt im 250-ms-Takt** zwischen hell (`255`) und gedimmt (`20`), weil es als Nächstes erlischt. - **Zeitablauf (Timeout):** Erreicht der Countdown 0 Sekunden, erscheint ein `X` (`IconNames.No`), eine absteigende Melodie ertönt, und das aktuelle Level startet automatisch neu.  ### 4.2 Kontinuierliches Distanz-Fading (Zeilen 1 bis 4) - Alle ungelösten Zeilen starten als durchgehende waagrechte Linien (alle 5 LEDs der Zeile leuchten mit `255`). - Sobald ein Sensorwert in Richtung des Zielwerts verändert wird, berechnet die Hauptschleife alle `50 ms` die verbleibende Distanz zum Schwellenwert und reduziert die PWM-Helligkeit (`led.plotBrightness`) der gesamten Linie proportional von `255` bis `0`.  ---  ## 📜 5. Handbuch des Bombenexperten (Vorlage für die Mitspieler)  > Die Experten sitzen mit dem Handbuch bereit. Auf dem micro:bit leuchten zu Beginn **5 durchgehende waagrechte Linien**!  ### ⚠️ Grundregeln 1. **Die oberste Linie (Zeile 0) ist eure Zeit (30 Sekunden):** Das jeweils **letzte Pixel rechts blinkt**, weil es als Nächstes erlischt. Sind alle 5 Pixel oben aus, startet das Level neu! 2. **Die 4 Linien darunter (Zeilen 1 bis 4) sind die Sicherungen:** Wenn ihr auf der richtigen Spur seid, **wird die jeweilige Linie immer dunkler (Fading)**, bis sie mit einem Piepton ganz verschwindet!  ---  ### 1️⃣ Level 1: Die Biometrie- & Tasten-Freigabe - **Sicherungen 1, 2 und 3 (Die oberen drei Rätsel-Linien):** * Legt einen Finger auf das **goldene Gesicht (Touch-Logo)** oben in der Mitte und **haltet es für knapp 1 Sekunde (0,8 s) gedrückt**. * Ihr seht live, wie **Linie 1** immer dunkler wird und mit einem Ton erlischt! * **Lasst das Gesicht kurz los** und haltet es **zum 2. Mal gedrückt**, bis **Linie 2** ausgeblendet ist. * **Lasst erneut kurz los** und haltet es **zum 3. Mal gedrückt**, bis auch **Linie 3** erlischt! - **Sicherung 4 (Die unterste Linie):** * Deckt das Display mit der Hand ab (**Abdunkeln** – die Linie fadet mit zunehmender Dunkelheit aus) **ODER** drückt auf **Taste A** bzw. **Taste B**. - **Level-Erfolg:** Es erscheinen das Häkchen und das **Dollar-Zeichen (`$`)**, danach startet Runde `"2"`.
 
 ---
 
-### 3.2 Level 2: Der Erschütterungs- & Umweltsensor
-* **Thema:** Der Zünder reagiert hochsensibel auf Licht und Erschütterungen.
-* **Sichtbarer Countdown:** Die oberste Zeile zählt weiter sichtbar von 10 auf 0 herunter (nächstes Pixel blinkt).
-* **Aufgabe & Mechanik:**
-  1. **Lichtschranke blockieren:** Den Lichtsensor auf der LED-Matrix vollständig mit der flachen Hand abdunkeln (`lightLevel() < 15`).
-  2. **Akustischer Entlastungsimpuls:** Während es dunkel ist, gezielt **einmal laut klatschen** (`DetectedSound.Loud`).
-  3. **Strikte Erschütterungsfreiheit:** Während des gesamten Moduls darf der micro:bit nicht geschüttelt werden (`onGesture(Shake)` erzeugt sofort einen Strike!).
-* **Belohnungs-Mechanik (Zeit-Bonus):** Das erfolgreiche Überbrücken des Sensors schenkt dem Team **+25 Sekunden Bonuszeit**!
-* **Erfolgs-Feedback:** Schloss-Symbol / Doppelton, Übergang zu Level 3.
-
----
-
-### 3.3 Level 3: Der Finale Entschärfungscode (Kompass & Touch-Logo)
-* **Thema:** Das Deaktivieren der Hauptladung erfordert präzise Ausrichtung und biometrische Freigabe.
-* **Aufgabe & Mechanik:**
-  1. **Kompass-Ausrichtung:** Der micro:bit muss flach auf den Tisch gelegt und exakt nach **Norden** ausgerichtet werden (Magnetkurs zwischen 350° und 10°).
-  2. **Biometrische Entschärfung:** Sobald die Nord-Richtung stimmt, muss das **goldene Touch-Logo** für mindestens 3 Sekunden ununterbrochen berührt werden.
-* **Erfolgs-Feedback:** Das Ticken stoppt sofort – die Bombe ist entschärft!
-
----
-
-### 3.4 Das Finale: Erfolg vs. Detonation
-
-#### 🏆 Szenario A: Bombe erfolgreich entschärft (DEFUSED)
-* **Visualisierung:** Großes Häkchen (`IconNames.Yes`), danach Laufschrift: `"DEFUSED!"`.
-* **Audio:** Siegesfanfare (triumphale Melodie).
-* **Status:** Der Timer stoppt, das System schaltet sich sicher ab.
-
-#### 💥 Szenario B: Detonation (BOOM!)
-* **Trigger:** Countdown erreicht 0 Sekunden ODER 3 Strikes erreicht.
-* **Visualisierung:** Display flackert hektisch, Totenkopf-Symbol (`IconNames.Skull`), Laufschrift `"BOOM!"`.
-* **Audio:** Absteigendes Glissando, dumpfer Explosions-Ton.
-
----
-
-## ⏱️ 4. Feedback-, Timer- und Strike-System
-
-### 4.1 Der sichtbare LED-Countdown
-* **Countdown in der obersten Zeile:** Die oberste LED-Zeile (y = 0) dient als permanenter visueller Countdown von 10 auf 0 Pixel.
-* **10-Stufen Balkenanzeige & Blinken:**
-  * Der Countdown wird in 10 Stufen dargestellt (entsprechend den 5 LEDs der obersten Zeile: 5 LEDs x 2 Zustände, bzw. 10 Pixel-Einheiten).
-  * Bereits abgelaufene Pixel sind dunkel (aus).
-  * Vollständig verbleibende Pixel leuchten dauerhaft.
-  * **Das nächste Pixel, das verschwinden wird, blinkt dabei rhythmisch**, sodass der Zeitverlust visuell sofort erfassbar ist!
-* **Zeitzugewinn sichtbar:** Wird ein Schritt gelöst und die Restzeit erhöht sich, **schalten sich erloschene Pixel wieder an**! Das Team sieht sofort, wie wertvolle Zeit zurückgewonnen wird.
-
-### 4.2 Das 3-Stufen-Tickintervall
-Das akustische Ticken passt sich dynamisch der verbleibenden Restzeit an:
-1. **Entspannte Phase (> 60 Sekunden Restzeit):** Ticken ertönt gemächlich **alle 10 Sekunden**.
-2. **Kritische Phase (20 bis 60 Sekunden Restzeit):** Ticken beschleunigt sich auf **alle 5 Sekunden**.
-3. **Panik-Phase (< 20 Sekunden Restzeit):** Ticken hetzt **alle 2 Sekunden**.
-
-### 4.3 Schrittweiser Zeit-Bonus
-* Abschluss von Level 1 (Kombinierte A+B Eingabe): **+20 Sekunden**
-* Abschluss von Level 2: **+25 Sekunden**
-* Dadurch können Teams, die schnell kombinieren, ihre Überlebenschancen aktiv verbessern.
-
-### 4.4 Das Strike-System
-* Maximal 3 Strikes erlaubt.
-* Strike 1 & 2: Warnton, kurzes `"X"`, Abzug von 15 Sekunden.
-* Strike 3: Sofortige Detonation!
-
----
-
-## 📜 5. Handbuch des Bombenexperten (Für die Mitspieler)
-
-> Die Experten sitzen abgewandt mit dem Handbuch. Nur der Entschärfer bedient den micro:bit!
-
-```markdown
-# 📋 Das Handbuch des Bombenexperten
-
-## ⚠️ Sicherheitsregeln
-1. Berühre die Bombe niemals selbst – nur der Entschärfer vor Ort bedient den micro:bit!
-2. Achtung auf das Ticken: Zuerst tickt es alle 10 Sekunden, dann alle 5 Sekunden und unter 20 Sekunden alle 2 Sekunden!
-3. Richtige Schritte schenken euch wertvolle Bonuszeit (+15s bis +25s)!
-4. Bei 3 Strikes oder Ablauf des Timers explodiert das System.
-
----
-
-### 1️⃣ Modul 1: Die Tasten-Sicherheitssequenz
-* **Anzeige:** Oberste Zeile zeigt den Countdown (10 auf 0, nächstes Pixel blinkt).
-* **Aktion:**
-  * Verwende **ausschließlich die kombinierte A+B Eingabe**!
-  * Drücke **Taste A und Taste B gleichzeitig (A+B)**, um das Sicherheitsrelais zu überbrücken.
-  * Ein heller Bestätigungston ertönt und der Zeitbonus (+20s) wird gutgeschrieben!
-
----
-
-### 2️⃣ Modul 2: Der Erschütterungs- & Schallsensor
-* **Anzeige:** Countdown läuft sichtbar weiter.
-* **Aktion:**
-  1. Halte den micro:bit absolut ruhig – **NICHT schütteln** (Schütteln gibt sofort einen Strike)!
-  2. Decke das gesamte 5x5 Display mit der flachen Hand lichtdicht ab.
-  3. Während es dunkel ist: Klatsche **einmal kräftig in die Hände**!
-  4. Ein Doppelton und ein Zeitzuschlag signalisieren den Erfolg.
-
----
-
-### 3️⃣ Modul 3: Das Finale (Orientierung & Biometrie)
-* **Anzeige:** Countdown nähert sich dem Ende.
-* **Aktion:**
-  1. Lege den micro:bit flach hin und drehe ihn exakt nach **Norden** (0°).
-  2. Sobald die Nord-Richtung stimmt: Halte das **goldene micro:bit Logo** für mindestens **3 Sekunden** fest berührt.
-* **Erfolg:** Das Häkchen erscheint, die Siegesfanfare ertönt – BOMB DEFUSED!
-```
+### 2️⃣ Level 2: Die Sensor-Kombination (Runde "2")
+Wieder leuchten alle 5 durchgehenden Linien, und oben rechts blinkt der neue 30-Sekunden-Countdown!
+- **Linie 1 (Akustik-Sicherung):** Macht ein lautes Geräusch oder klatscht in die Hände – je lauter, desto dunkler wird Linie 1, bis sie verschwindet!
+- **Linie 2 (Kinetik-Sicherung):** **Schüttelt** den micro:bit kräftig!
+- **Linie 3 (Optik-Sicherung):** Bringt **viel Licht** auf das Display (z. B. zur Deckenlampe oder Taschenlampe drehen).
+- **Linie 4 (Lage-Sicherung):** **Neigt den micro:bit nach rechts** (je weiter nach rechts geneigt, desto dunkler wird Linie 4) oder berührt das **Gesicht**.
+- **Finale:** Sind alle vier Linien gelöscht, erscheint der **Pokal (Trophy)** und die große Siegesfanfare ertönt!
 
 ---
 
 ## 💻 6. Technische Software-Architektur (MakeCode TypeScript)
 
-Hier ist die vollständige Implementierung ohne externe Drähte, mit sichtbarem LED-Countdown, gestaffeltem Ticken und Zeit-Bonus pro Schritt:
-
 ```typescript
 /**
- * BOMB DEFUSAL PUZZLE (MakeCode TypeScript)
- * Komplett autark ohne externe Drähte
+ * Globale Variablen
+ * Zeile 0 = Countdown (5 LEDs, das jeweils letzte Pixel rechts blinkt)
+ * Zeilen 1..3 = In Level 1 gesteuert über Touch auf das Gesicht (Logo) mit Halte-Fading
+ * Zeile 4 = In Level 1 gesteuert über Lichtsensor / Tasten A & B
  */
-
-// --- Spiel-Zustände ---
-let AktuellesLevel = 1      // 1 = Tasten, 2 = Sensoren, 3 = Kompass/Logo, 4 = Defused, 5 = Detonated
-let Strikes = 0
-const MAX_STRIKES = 3
-const MAX_ZEIT = 120        // Maximale Startzeit in Sekunden
-let ZeitUebrig = 90         // Aktuelle Restzeit in Sekunden
 let SpielGesperrt = false
+let AktuellesLevel = 0
 
-// Status für Countdown-Blinken
-let BlinkZustand = true
+// Index 0 = Countdown, Indizes 1..4 = die 4 Rätsel-Linien
+let ZeilenStatus: boolean[] = [true, true, true, true, true]
+let ZeilenHelligkeit: number[] = [255, 255, 255, 255, 255]
 
-// Zeit-Tracking für Ticken
-let LetzterTick = 0
+// Countdown: 30 Sekunden pro Level (6 Sekunden pro Pixel in Zeile 0)
+const LEVEL_DAUER_MS = 30000
+let LevelStartZeit = 0
 
-// --- Start & Initialisierung ---
-function StartSpiel() {
-    AktuellesLevel = 1
-    Strikes = 0
-    ZeitUebrig = 90
-    BlinkZustand = true
+// Variablen für das analoge Fading beim Berühren des Gesichts (Zeilen 1, 2, 3)
+const LOGO_FADE_DAUER_MS = 800
+let LogoDruckStart = 0
+let LogoWarGedrueckt = false
+let WarteAufLogoLoslassen = false
+
+function StarteLevel (level: number) {
+    SpielGesperrt = true
+    AktuellesLevel = level
+    ZeilenStatus = [true, true, true, true, true]
+    ZeilenHelligkeit = [255, 255, 255, 255, 255]
+    LogoWarGedrueckt = false
+    WarteAufLogoLoslassen = false
+    if (level == 2) {
+        basic.showString("2")
+    }
+    LevelStartZeit = input.runningTime()
     SpielGesperrt = false
-    LetzterTick = control.millis()
-    UpdateDisplay()
+    UpdateGraphik()
 }
 
-// --- Sichtbarer Countdown in der obersten Zeile (von 10 auf 0 Pixel) ---
-// 10 Stufen auf 5 LEDs: Jede LED entspricht 2 Stufen.
-// Voll verbleibende Pixel leuchten dauerhaft, das nächste verschwindende Pixel blinkt.
-function UpdateDisplay() {
-    if (SpielGesperrt) return
-
-    // Oberste Zeile (y = 0) für den Countdown aktualisieren
-    // Zeit proportional auf 10 Stufen (10 auf 0) umrechnen:
-    let stufen = Math.clamp(0, 10, Math.ceil((ZeitUebrig / MAX_ZEIT) * 10))
-
-    for (let x = 0; x < 5; x++) {
-        let ledIndex = x
-        let vollSchwelle = (ledIndex + 1) * 2 // Schwelle für dauerhaft an (2, 4, 6, 8, 10)
-        let blinkSchwelle = vollSchwelle - 1   // Schwelle für nächste Stufe (1, 3, 5, 7, 9)
-
-        if (stufen >= vollSchwelle) {
-            // Voll verbleibend: dauerhaft AN
-            led.plot(x, 0)
-        } else if (stufen == blinkSchwelle) {
-            // Nächstes Pixel, das verschwinden wird: BLINKT
-            if (BlinkZustand) {
-                led.plot(x, 0)
-            } else {
-                led.unplot(x, 0)
-            }
-        } else {
-            // Bereits erloschen: AUS
-            led.unplot(x, 0)
-        }
+function UpdateGraphik () {
+    if (SpielGesperrt) {
+        return
     }
-}
-
-// --- Zeit-Bonus gutschreiben ---
-function AddiereBonuszeit(sekunden: number) {
-    ZeitUebrig = Math.min(MAX_ZEIT, ZeitUebrig + sekunden)
-    music.playTone(988, 80) // Heller Bestätigungston
-    UpdateDisplay()
-}
-
-// --- Fehler- / Strike-Behandlung ---
-function RegistriereFehler() {
-    Strikes++
-    music.playTone(200, 300)
-    basic.showIcon(IconNames.No)
-    basic.pause(400)
-    ZeitUebrig = Math.max(3, ZeitUebrig - 15) // Zeitstrafe: -15s
-    if (Strikes >= MAX_STRIKES) {
-        Detoniere()
-    } else {
-        UpdateDisplay()
-    }
-}
-
-// --- Detonation ---
-function Detoniere() {
-    AktuellesLevel = 5
-    SpielGesperrt = true
-    music.playTone(130, 800)
-    basic.showIcon(IconNames.Skull)
-    music.playMelody("C5 B A G F E D C ", 300)
-    basic.showString("BOOM!")
-}
-
-// --- Erfolg / Entschärft ---
-function Entschaerft() {
-    AktuellesLevel = 4
-    SpielGesperrt = true
-    basic.showIcon(IconNames.Yes)
-    music.playMelody("C E G C5 C5 G E C ", 240)
-    basic.showString("DEFUSED!")
-}
-
-// --- Hintergrund-Schleife: Timer, Ticken & Countdown-Update (inkl. Blinken) ---
-control.inBackground(function () {
-    let sekundenZaehlerMs = 0
-    while (AktuellesLevel < 4) {
-        basic.pause(250) // 250ms Takt für flüssiges Blinken des nächsten Pixels
-        sekundenZaehlerMs += 250
-        BlinkZustand = !BlinkZustand
-
-        if (sekundenZaehlerMs >= 1000) {
-            sekundenZaehlerMs = 0
-            ZeitUebrig--
-
-            // Berechne Tick-Intervall abhängig von Restzeit:
-            // > 60s  -> alle 10 Sekunden
-            // 20-60s -> alle 5 Sekunden
-            // < 20s  -> alle 2 Sekunden
-            let tickIntervallMs = 10000
-            if (ZeitUebrig <= 20) {
-                tickIntervallMs = 2000
-            } else if (ZeitUebrig <= 60) {
-                tickIntervallMs = 5000
-            }
-
-            let jetzt = control.millis()
-            if (jetzt - LetzterTick >= tickIntervallMs) {
-                music.playTone(880, 25)
-                LetzterTick = jetzt
-            }
-        }
-
-        UpdateDisplay()
-
-        if (ZeitUebrig <= 0) {
-            Detoniere()
-            break
-        }
-    }
-})
-
-// --- Level 1: Nur die kombinierte A+B Eingabe (Button.AB) ---
-// Einzelne A- oder B-Eingaben werden nicht verwendet.
-input.onButtonPressed(Button.AB, function () {
-    if (AktuellesLevel != 1 || SpielGesperrt) return
-
-    // Kombinierte A+B Eingabe löst Level 1 erfolgreich:
-    AddiereBonuszeit(20) // Level 1 abgeschlossen: +20s Bonus!
-    AktuellesLevel = 2
-    basic.showIcon(IconNames.Yes)
-    basic.pause(800)
     basic.clearScreen()
-    UpdateDisplay()
-})
 
-// --- Level 2: Sensoren (Dunkelheit + Lauter Sound, Erschütterungsverbot) ---
-input.onGesture(Gesture.Shake, function () {
-    if (AktuellesLevel == 2 && !SpielGesperrt) {
-        RegistriereFehler() // Bombe darf in Level 2 nicht geschüttelt werden!
-    }
-})
+    // 1. ZEILE 0 (y = 0): Durchgehende Countdown-Linie, rechtestes aktives Pixel blinkt
+    let vergangeneZeit = input.runningTime() - LevelStartZeit
+    let restZeit = Math.max(0, LEVEL_DAUER_MS - vergangeneZeit)
+    let aktivePixelAnzahl = Math.ceil((restZeit / LEVEL_DAUER_MS) * 5)
+    let blinkIndex = aktivePixelAnzahl - 1 // Startet bei x = 4 (oben rechts)
 
-input.onSound(DetectedSound.Loud, function () {
-    if (AktuellesLevel == 2 && !SpielGesperrt) {
-        if (input.lightLevel() < 15) {
-            // Richtig: Abgedunkelt UND geklatscht!
-            AddiereBonuszeit(25) // Level 2 gelöst: +25s!
-            AktuellesLevel = 3
-            basic.showIcon(IconNames.Yes)
-            basic.pause(800)
-            UpdateDisplay()
-        } else {
-            RegistriereFehler()
+    // Blink-Takt: 250ms an (255), 250ms dunkel (20)
+    let blinkAn = (Math.idiv(input.runningTime(), 250) % 2) == 0
+
+    for (let x = 0; x <= 4; x++) {
+        if (x < blinkIndex) {
+            led.plotBrightness(x, 0, 255)
+        } else if (x == blinkIndex) {
+            led.plotBrightness(x, 0, blinkAn ? 255 : 20)
         }
     }
-})
 
-// --- Level 3: Kompass (Nord) + Touch-Logo ---
-let logoGedruecktDauer = 0
-basic.forever(function () {
-    if (AktuellesLevel == 3 && !SpielGesperrt) {
-        let heading = input.compassHeading()
-        let isNord = (heading < 15 || heading > 345)
-
-        if (isNord && input.logoIsPressed()) {
-            logoGedruecktDauer++
-            music.playTone(500 + logoGedruecktDauer * 120, 60)
-            if (logoGedruecktDauer >= 6) { // ca. 3 Sekunden gehalten
-                Entschaerft()
+    // 2. ZEILEN 1..4 (y = 1..4): Vier durchgehende waagrechte Linien
+    for (let y = 1; y <= 4; y++) {
+        if (ZeilenStatus[y]) {
+            for (let x = 0; x <= 4; x++) {
+                led.plotBrightness(x, y, ZeilenHelligkeit[y])
             }
-        } else {
-            logoGedruecktDauer = 0
         }
-        basic.pause(500)
+    }
+}
+
+function ZeileLoeschen (ZeilenNummer: number, BenoetigtesLevel: number) {
+    if (SpielGesperrt || AktuellesLevel != BenoetigtesLevel || ZeilenNummer < 1 || ZeilenNummer > 4) {
+        return
+    }
+    if (ZeilenStatus[ZeilenNummer]) {
+        ZeilenStatus[ZeilenNummer] = false
+        ZeilenHelligkeit[ZeilenNummer] = 0
+        music.playTone(523, music.beat(BeatFraction.Sixteenth))
+        UpdateGraphik()
+
+        // Prüfen, ob alle 4 Rätsel-Zeilen (Index 1..4) gelöst sind
+        if (!ZeilenStatus[1] && !ZeilenStatus[2] && !ZeilenStatus[3] && !ZeilenStatus[4]) {
+            if (AktuellesLevel == 1) {
+                Level1Geschafft()
+            } else if (AktuellesLevel == 2) {
+                Level2Geschafft()
+            }
+        }
+    }
+}
+
+// Hilfsfunktion: Findet die nächste aktive Zeile aus 1, 2, 3 für den Gesicht-Touch
+function NaechsteLogoZeile (): number {
+    for (let z = 1; z <= 3; z++) {
+        if (ZeilenStatus[z]) {
+            return z
+        }
+    }
+    return -1
+}
+
+function ZeitAbgelaufen () {
+    SpielGesperrt = true
+    basic.showIcon(IconNames.No)
+    music.playMelody("C5 B A G F E D C ", 200)
+    basic.pause(2000)
+    StarteLevel(AktuellesLevel)
+}
+
+function Level1Geschafft () {
+    SpielGesperrt = true
+    basic.showIcon(IconNames.Yes)
+    basic.pause(2000)
+    basic.showLeds(`
+        . # # # .
+        # . # . .
+        . # # # .
+        . . # . #
+        . # # # .
+        `)
+    music.playMelody("E G B C5 - - - - ", 300)
+    basic.pause(5000)
+    StarteLevel(2)
+}
+
+function Level2Geschafft () {
+    SpielGesperrt = true
+    AktuellesLevel = 3
+    basic.showIcon(IconNames.Yes)
+    basic.pause(1000)
+    basic.showLeds(`
+        # # # # #
+        . # # # .
+        . . # . .
+        . # # # .
+        # # # # #
+        `)
+    music.playMelody("G C5 E C5 G C5 E C5 ", 180)
+}
+
+// --- DISKRETE INPUTS LEVEL 1 (Tasten A & B für Zeile 4) ---
+input.onButtonPressed(Button.A, function () {
+    ZeileLoeschen(4, 1)
+})
+input.onButtonPressed(Button.B, function () {
+    ZeileLoeschen(4, 1)
+})
+
+// --- DISKRETE INPUTS LEVEL 2 (Gesten & Logo) ---
+input.onGesture(Gesture.Shake, function () {
+    ZeileLoeschen(2, 2)
+})
+input.onGesture(Gesture.TiltRight, function () {
+    ZeileLoeschen(4, 2)
+})
+input.onLogoEvent(TouchButtonEvent.Pressed, function () {
+    if (AktuellesLevel == 2) {
+        ZeileLoeschen(4, 2)
     }
 })
 
-// Start initialisieren
-StartSpiel()
+// --- Spielstart ---
+StarteLevel(1)
+
+// --- Hauptschleife: Countdown-Blinken & Analoge Distanz-Berechnung ---
+basic.forever(function () {
+    if (!SpielGesperrt && (AktuellesLevel == 1 || AktuellesLevel == 2)) {
+        // 1. Countdown prüfen
+        if (input.runningTime() - LevelStartZeit >= LEVEL_DAUER_MS) {
+            ZeitAbgelaufen()
+            return
+        }
+
+        if (AktuellesLevel == 1) {
+            // LEVEL 1: Zeilen 1, 2, 3 über Touch auf das Gesicht (Logo)
+            let aktiveLogoZeile = NaechsteLogoZeile()
+            if (aktiveLogoZeile != -1) {
+                if (input.logoIsPressed()) {
+                    if (!WarteAufLogoLoslassen) {
+                        if (!LogoWarGedrueckt) {
+                            LogoWarGedrueckt = true
+                            LogoDruckStart = input.runningTime()
+                        }
+                        let halteDauer = input.runningTime() - LogoDruckStart
+                        ZeilenHelligkeit[aktiveLogoZeile] = Math.constrain(
+                            Math.floor(((LOGO_FADE_DAUER_MS - halteDauer) / LOGO_FADE_DAUER_MS) * 255),
+                            0,
+                            255
+                        )
+                        if (halteDauer >= LOGO_FADE_DAUER_MS) {
+                            ZeileLoeschen(aktiveLogoZeile, 1)
+                            WarteAufLogoLoslassen = true
+                            LogoWarGedrueckt = false
+                        }
+                    }
+                } else {
+                    LogoWarGedrueckt = false
+                    WarteAufLogoLoslassen = false
+                    if (ZeilenStatus[aktiveLogoZeile]) {
+                        ZeilenHelligkeit[aktiveLogoZeile] = 255
+                    }
+                }
+            }
+
+            // Zeile 4: Lichtsensor (Ziel <= 20, oder Taste A/B drücken)
+            if (ZeilenStatus[4]) {
+                let light1 = input.lightLevel()
+                ZeilenHelligkeit[4] = Math.constrain(Math.floor(((light1 - 20) / 108) * 255), 0, 255)
+                if (light1 <= 20) ZeileLoeschen(4, 1)
+            }
+        } else if (AktuellesLevel == 2) {
+            // LEVEL 2: Analoge Sensoren
+            // Zeile 1: Schallsensor (Ziel >= 128)
+            if (ZeilenStatus[1]) {
+                let sound = input.soundLevel()
+                ZeilenHelligkeit[1] = Math.constrain(Math.floor(((128 - sound) / 128) * 255), 0, 255)
+                if (sound >= 128) ZeileLoeschen(1, 2)
+            }
+            // Zeile 2: Beschleunigung / Schütteln (Ziel >= 2000 mg)
+            if (ZeilenStatus[2]) {
+                let acc = input.acceleration(Dimension.Strength)
+                ZeilenHelligkeit[2] = Math.constrain(Math.floor(((2000 - acc) / 1000) * 255), 0, 255)
+                if (acc >= 2000) ZeileLoeschen(2, 2)
+            }
+            // Zeile 3: Lichtstärke erhöhen (Ziel >= 220)
+            if (ZeilenStatus[3]) {
+                let light2 = input.lightLevel()
+                ZeilenHelligkeit[3] = Math.constrain(Math.floor(((220 - light2) / 92) * 255), 0, 255)
+                if (light2 >= 220) ZeileLoeschen(3, 2)
+            }
+            // Zeile 4: Neigung nach rechts / X-Achse (Ziel >= 700 mg oder Logo drücken)
+            if (ZeilenStatus[4]) {
+                let tiltX = Math.max(0, input.acceleration(Dimension.X))
+                ZeilenHelligkeit[4] = Math.constrain(Math.floor(((700 - tiltX) / 700) * 255), 0, 255)
+                if (tiltX >= 700) ZeileLoeschen(4, 2)
+            }
+        }
+
+        UpdateGraphik()
+    }
+    basic.pause(50)
+})
 ```
 
 ---
 
 ## 🚀 7. Didaktischer Mehrwert & Workshop-Einsatz
 
-* **Zero-Setup & Plug & Play:** Da keine externen Drähte oder Krokodilklemmen benötigt werden, ist das Spiel sofort einsatzbereit, robust und ausfallsicher.
-* **Spannungsaufbau durch adaptives Ticken:** Der Übergang von 10s auf 5s und schließlich 2s Taktung erzeugt authentische Escape-Room-Atmosphäre und zwingt die Jugendlichen zur Fokussierung.
-* **Transparenz durch sichtbaren Countdown:** Die oberste LED-Zeile mit dem von 10 auf 0 zählenden und blinkenden Pixel vermittelt den Zeitdruck unmittelbar und visuell begreifbar.
-* **Positive Verstärkung:** Dass gelöste Schritte wertvolle Bonuszeit zurückgeben, belohnt strukturiertes und ruhiges Vorgehen der Gruppe.
+- **Zero-Setup & Plug & Play:** Da keine externen Drähte oder Krokodilklemmen benötigt werden, ist das Spiel sofort einsatzbereit, robust und ausfallsicher.
+- **Unmittelbares Sensor-Feedback durch PWM-Fading:** Die Jugendlichen erleben analoge Messwerte (Lichtstärke, Schallpegel, Beschleunigung, Zeitdauer) direkt visuell über die Helligkeitsstufen (`0..255`) der vier waagrechten LED-Linien.
+- **Transparenz durch sichtbaren Countdown:** Die oberste LED-Zeile mit dem blinkenden rechten Grenzpixel vermittelt den 30-Sekunden-Zeitdruck pro Level unmittelbar und intuitiv.
+- **Frustfreier Workshop-Ablauf:** Durch den Verzicht auf den kalibrierungspflichtigen Kompass und den automatischen Neustart des aktuellen Levels bei Zeitablauf bleibt der Spielfluss jederzeit erhalten.
