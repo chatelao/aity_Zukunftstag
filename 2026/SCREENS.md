@@ -165,10 +165,6 @@ Je lauter es ist bzw. je näher an Norden / je dunkler, desto schwächer leuchte
 
 ### Schritt 4 – Nach rechts geneigt
 
-> [!WARNING]
-> In der aktuellen [`main.ts`](main.ts) ist für Zeile 3 **kein Eingabe-Handler** vorhanden (z. B. `input.onGesture(Gesture.TiltRight, ...)`).
-> Diese Zeile kann daher momentan nicht gelöscht werden und Level 2 lässt sich nicht abschließen. Die folgenden Bilder zeigen das **erwartete** Verhalten.
-
 ```
 +---------+
 |. . . . .|

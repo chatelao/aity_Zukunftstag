@@ -179,7 +179,7 @@ def on_forever():
         # 1. Analoger Schallsensor (Zeile 0)
         if ZeilenStatus[0]:
             sound = input.sound_level()
-            neue_helligkeit0 = Math.clamp(0, 255, Math.floor(255 - (sound / 128) * 255))
+            neue_helligkeit0 = Math.constrain(Math.floor(255 - (sound / 128) * 255), 0, 255)
             if neue_helligkeit0 < HelligkeitZeile0:
                 HelligkeitZeile0 = neue_helligkeit0
                 update_noetig = True
@@ -190,10 +190,10 @@ def on_forever():
         if ZeilenStatus[2]:
             heading = input.compass_heading()
             diff_kompass = min(heading, 360 - heading)
-            helligkeit_kompass = Math.clamp(0, 255, Math.floor((diff_kompass / 90) * 255))
+            helligkeit_kompass = Math.constrain(Math.floor((diff_kompass / 90) * 255), 0, 255)
 
             light = input.light_level()
-            helligkeit_licht = Math.clamp(0, 255, Math.floor((light / 100) * 255))
+            helligkeit_licht = Math.constrain(Math.floor((light / 100) * 255), 0, 255)
 
             ziel_helligkeit2 = min(helligkeit_kompass, helligkeit_licht)
             if ziel_helligkeit2 != HelligkeitZeile2:

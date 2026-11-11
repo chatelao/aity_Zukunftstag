@@ -152,6 +152,10 @@ function Level1Geschafft () {
 input.onGesture(Gesture.Shake, function () {
     ZeileLoeschen(1, 2)
 })
+input.onGesture(Gesture.TiltRight, function () {
+    // Zeile 3: Nach rechts neigen
+    ZeileLoeschen(3, 2)
+})
 input.onSound(DetectedSound.Loud, function () {
     ZeileLoeschen(0, 2)
 })
@@ -191,7 +195,7 @@ basic.forever(function () {
         if (ZeilenStatus[0]) {
             let sound = input.soundLevel()
             // Schwellenwert fuer lauten Ton ist ca. 128
-            let neueHelligkeit0 = Math.clamp(0, 255, Math.floor(255 - (sound / 128) * 255))
+            let neueHelligkeit0 = Math.constrain(Math.floor(255 - (sound / 128) * 255), 0, 255)
             if (neueHelligkeit0 < HelligkeitZeile0) {
                 HelligkeitZeile0 = neueHelligkeit0
                 updateNoetig = true
@@ -206,11 +210,11 @@ basic.forever(function () {
             let heading = input.compassHeading()
             let diffKompass = Math.min(heading, 360 - heading)
             // Je naeher an 0 Grad (Nord), desto dunkler
-            let helligkeitKompass = Math.clamp(0, 255, Math.floor((diffKompass / 90) * 255))
+            let helligkeitKompass = Math.constrain(Math.floor((diffKompass / 90) * 255), 0, 255)
 
             let light = input.lightLevel()
             // Je dunkler (Licht abdecken), desto dunkler
-            let helligkeitLicht = Math.clamp(0, 255, Math.floor((light / 100) * 255))
+            let helligkeitLicht = Math.constrain(Math.floor((light / 100) * 255), 0, 255)
 
             // Kombination aus beiden analogen Bedingungen (minimaler Helligkeitswert)
             let zielHelligkeit2 = Math.min(helligkeitKompass, helligkeitLicht)
