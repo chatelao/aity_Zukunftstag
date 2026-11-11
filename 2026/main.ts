@@ -1,93 +1,79 @@
 /**
  * Globale Variablen
+ * Zeile 0 = Countdown
+ * Zeilen 1..4 = Rätsel 3 (00011), 5 (00101), 7 (00111), 9 (01001)
  */
 let SpielGesperrt = false
 let AktuellesLevel = 0
-let ZeilenStatus: boolean[] = [true, true, true, true, true]
-let HelligkeitZeile0 = 255
-let HelligkeitZeile2 = 255
 
-function UpdateGraphik () {
-    basic.clearScreen()
-    if (AktuellesLevel == 1) {
-        // LEVEL 1: Binaere Fortschrittsanzeige (3, 5, 7, 9)
-        if (ZeilenStatus[0]) {
-            // 3 = 00011 (P0)
-            led.plot(3, 0)
-            led.plot(4, 0)
-        }
-        if (ZeilenStatus[1]) {
-            // 5 = 00101 (P1)
-            led.plot(2, 1)
-            led.plot(4, 1)
-        }
-        if (ZeilenStatus[2]) {
-            // 7 = 00111 (P2)
-            led.plot(2, 2)
-            led.plot(3, 2)
-            led.plot(4, 2)
-        }
-        if (ZeilenStatus[3]) {
-            // 9 = 01001 (Taste A)
-            led.plot(1, 3)
-            led.plot(4, 3)
-        }
-        if (ZeilenStatus[4]) {
-            // Taste B
-            led.plot(0, 4)
-            led.plot(1, 4)
-            led.plot(2, 4)
-        }
-    } else if (AktuellesLevel == 2) {
-        // LEVEL 2: Hohles Logo (Nur Punkte/Kontur)
-        if (ZeilenStatus[0]) {
-            // Zeile 0: Schallsensor (fade bis 0 / geloest)
-            led.plotBrightness(0, 0, HelligkeitZeile0)
-            led.plotBrightness(2, 0, HelligkeitZeile0)
-        }
-        // Lücke in der Mitte
-        if (ZeilenStatus[1]) {
-            // Zeile 1: Schütteln
-            led.plot(1, 1)
-            led.plot(3, 1)
-        }
-        if (ZeilenStatus[2]) {
-            // Zeile 2: Ausrichtung / Orientierung / Licht (fade bis 0 / geloest)
-            led.plotBrightness(2, 2, HelligkeitZeile2)
-            led.plotBrightness(4, 2, HelligkeitZeile2)
-        }
-        if (ZeilenStatus[3]) {
-            // Zeile 3: Rechts
-            led.plot(1, 3)
-            led.plot(3, 3)
-        }
-        if (ZeilenStatus[4]) {
-            // Zeile 4: Kopfueber / Logo
-            led.plot(0, 4)
-            led.plot(2, 4)
+// Index 0 wird für den Countdown reserviert, Indizes 1..4 sind die 4 Rätsel (3, 5, 7, 9)
+let ZeilenStatus: boolean[] = [true, true, true, true, true]
+let ZeilenHelligkeit: number[] = [255, 255, 255, 255, 255]
+
+// Countdown-Parameter (z.B. 30 Sekunden pro Level)
+const LEVEL_DAUER_MS = 30000
+let LevelStartZeit = 0
+
+function StarteLevel (level: number) {
+    SpielGesperrt = true
+    AktuellesLevel = level
+    ZeilenStatus = [true, true, true, true, true]
+    ZeilenHelligkeit = [255, 255, 255, 255, 255]
+    if (level == 2) {
+        basic.showString("2")
+    }
+    LevelStartZeit = input.runningTime()
+    SpielGesperrt = false
+    UpdateGraphik()
+}
+
+function ZeichneZeilenMuster (y: number, muster: number, helligkeit: number) {
+    // Zeichnet ein 5-Bit-Binärmuster (z.B. 3, 5, 7, 9) in Zeile y mit gegebener Helligkeit
+    for (let x = 0; x <= 4; x++) {
+        let bitPos = 4 - x
+        if ((muster & (1 << bitPos)) != 0) {
+            led.plotBrightness(x, y, helligkeit)
         }
     }
 }
 
-// --- Kern-Logik ---
-function ZeileLoeschen (ZeilenNummer: number, BenioetigtesLevel: number) {
-    // Eingabe nur verarbeiten, wenn wir im richtigen Level sind und keine Animation läuft
-    if (SpielGesperrt || AktuellesLevel != BenioetigtesLevel) {
+function UpdateGraphik () {
+    if (SpielGesperrt) {
         return
     }
-    // Wenn die Zeile noch da ist, löschen
-    if (ZeilenStatus[ZeilenNummer] == true) {
-        ZeilenStatus[ZeilenNummer] = false
-        if (ZeilenNummer == 0) {
-            HelligkeitZeile0 = 0
-        } else if (ZeilenNummer == 2) {
-            HelligkeitZeile2 = 0
+    basic.clearScreen()
+
+    // 1. ZEILE 0 (y = 0): Countdown-Anzeige (5 LEDs entsprechen 100% Zeit)
+    let vergangeneZeit = input.runningTime() - LevelStartZeit
+    let restFaktor = Math.constrain(1 - vergangeneZeit / LEVEL_DAUER_MS, 0, 1)
+    let exakteLeds = restFaktor * 5
+    for (let x = 0; x <= 4; x++) {
+        let ledAnteil = Math.constrain(exakteLeds - x, 0, 1)
+        led.plotBrightness(x, 0, Math.floor(ledAnteil * 255))
+    }
+
+    // 2. ZEILEN 1..4 (y = 1..4): Die 4 Rätsel mit den Binärmustern 3, 5, 7, 9
+    // y=1 -> 3 (00011), y=2 -> 5 (00101), y=3 -> 7 (00111), y=4 -> 9 (01001)
+    const muster = [0, 3, 5, 7, 9]
+    for (let y = 1; y <= 4; y++) {
+        if (ZeilenStatus[y]) {
+            ZeichneZeilenMuster(y, muster[y], ZeilenHelligkeit[y])
         }
-        // Sound-Feedback
+    }
+}
+
+function ZeileLoeschen (ZeilenNummer: number, BenoetigtesLevel: number) {
+    if (SpielGesperrt || AktuellesLevel != BenoetigtesLevel || ZeilenNummer < 1 || ZeilenNummer > 4) {
+        return
+    }
+    if (ZeilenStatus[ZeilenNummer]) {
+        ZeilenStatus[ZeilenNummer] = false
+        ZeilenHelligkeit[ZeilenNummer] = 0
         music.playTone(523, music.beat(BeatFraction.Sixteenth))
         UpdateGraphik()
-        // Prüfen, ob ALLE Zeilen gelöscht sind
-        if (!(ZeilenStatus.indexOf(true) >= 0)) {
+
+        // Prüfen, ob alle 4 Rätsel-Zeilen (Index 1..4) gelöst sind
+        if (!ZeilenStatus[1] && !ZeilenStatus[2] && !ZeilenStatus[3] && !ZeilenStatus[4]) {
             if (AktuellesLevel == 1) {
                 Level1Geschafft()
             } else if (AktuellesLevel == 2) {
@@ -97,29 +83,19 @@ function ZeileLoeschen (ZeilenNummer: number, BenioetigtesLevel: number) {
     }
 }
 
-// --- INPUTS LEVEL 1 (Pins & Buttons) ---
-input.onPinPressed(TouchPin.P0, function () {
-    ZeileLoeschen(0, 1)
-})
-input.onPinPressed(TouchPin.P1, function () {
-    ZeileLoeschen(1, 1)
-})
-input.onPinPressed(TouchPin.P2, function () {
-    ZeileLoeschen(2, 1)
-})
-input.onButtonPressed(Button.A, function () {
-    ZeileLoeschen(3, 1)
-})
-input.onButtonPressed(Button.B, function () {
-    ZeileLoeschen(4, 1)
-})
+function ZeitAbgelaufen () {
+    SpielGesperrt = true
+    basic.showIcon(IconNames.Skull)
+    music.playMelody("C5 B A G F E D C ", 200)
+    basic.pause(2000)
+    // Aktuelles Level neu starten
+    StarteLevel(AktuellesLevel)
+}
 
 function Level1Geschafft () {
     SpielGesperrt = true
-    // Gutzeichen
     basic.showIcon(IconNames.Yes)
     basic.pause(2000)
-    // Das Dollarzeichen ($)
     basic.showLeds(`
         . # # # .
         # . # . .
@@ -128,49 +104,15 @@ function Level1Geschafft () {
         . # # # .
         `)
     music.playMelody("E G B C5 - - - - ", 300)
-    // 5 Sekunden warten vor Runde 2
     basic.pause(5000)
-    // Reset für Level 2
-    AktuellesLevel = 2
-    ZeilenStatus = [
-        true,
-        true,
-        true,
-        true,
-        true
-    ]
-    HelligkeitZeile0 = 255
-    HelligkeitZeile2 = 255
-    // Alle Zeilen wieder an
-    SpielGesperrt = false
-    // Start-Animation für Level 2
-    basic.showString("2")
-    UpdateGraphik()
+    StarteLevel(2)
 }
-
-// --- INPUTS LEVEL 2 (Sensoren & Gesten) ---
-input.onGesture(Gesture.Shake, function () {
-    ZeileLoeschen(1, 2)
-})
-input.onGesture(Gesture.TiltRight, function () {
-    // Zeile 3: Nach rechts neigen
-    ZeileLoeschen(3, 2)
-})
-input.onSound(DetectedSound.Loud, function () {
-    ZeileLoeschen(0, 2)
-})
-input.onLogoEvent(TouchButtonEvent.Pressed, function () {
-    ZeileLoeschen(4, 2)
-})
 
 function Level2Geschafft () {
     SpielGesperrt = true
     AktuellesLevel = 3
-    // Spiel vorbei
-    // Gutzeichen
     basic.showIcon(IconNames.Yes)
     basic.pause(1000)
-    // Der POKAL (Trophy)
     basic.showLeds(`
         # # # # #
         . # # # .
@@ -178,59 +120,84 @@ function Level2Geschafft () {
         . # # # .
         # # # # #
         `)
-    // Große Siegesfanfare
     music.playMelody("G C5 E C5 G C5 E C5 ", 180)
 }
 
-// 1 = Erstes Spiel (Solid Logo), 2 = Zweites Spiel (Hohles Logo), 3 = Ende
-AktuellesLevel = 1
-UpdateGraphik()
+// --- DISKRETE FALLBACK-INPUTS LEVEL 1 (Buttons für Zeile 4 / Wert 9) ---
+input.onButtonPressed(Button.A, function () {
+    ZeileLoeschen(4, 1)
+})
+input.onButtonPressed(Button.B, function () {
+    ZeileLoeschen(4, 1)
+})
 
-// Periodische Ueberpruefung und kontinuierliches Helligkeits-Fading fuer analoge Raetsel
+// --- Spielstart ---
+StarteLevel(1)
+
+// --- Hauptschleife: Countdown & Analoge Distanz-Berechnung ---
 basic.forever(function () {
-    if (AktuellesLevel == 2 && !SpielGesperrt) {
-        let updateNoetig = false
+    if (!SpielGesperrt && (AktuellesLevel == 1 || AktuellesLevel == 2)) {
+        // 1. Countdown prüfen
+        if (input.runningTime() - LevelStartZeit >= LEVEL_DAUER_MS) {
+            ZeitAbgelaufen()
+            return
+        }
 
-        // 1. Analoger Schallsensor (Zeile 0)
-        if (ZeilenStatus[0]) {
-            let sound = input.soundLevel()
-            // Schwellenwert fuer lauten Ton ist ca. 128
-            let neueHelligkeit0 = Math.constrain(Math.floor(255 - (sound / 128) * 255), 0, 255)
-            if (neueHelligkeit0 < HelligkeitZeile0) {
-                HelligkeitZeile0 = neueHelligkeit0
-                updateNoetig = true
+        if (AktuellesLevel == 1) {
+            // LEVEL 1: Analoge Widerstandsmessung an P0, P1, P2 (Ruhewert ~1023, Berührung sinkt Richtung 0)
+            // Zeile 1 (Muster 3): Pin P0 (Ziel < 400)
+            if (ZeilenStatus[1]) {
+                let p0 = pins.analogReadPin(AnalogPin.P0)
+                ZeilenHelligkeit[1] = Math.constrain(Math.floor(((p0 - 400) / 600) * 255), 0, 255)
+                if (p0 <= 400) ZeileLoeschen(1, 1)
             }
-            if (sound >= 128 || HelligkeitZeile0 <= 0) {
-                ZeileLoeschen(0, 2)
+            // Zeile 2 (Muster 5): Pin P1 (Ziel < 400)
+            if (ZeilenStatus[2]) {
+                let p1 = pins.analogReadPin(AnalogPin.P1)
+                ZeilenHelligkeit[2] = Math.constrain(Math.floor(((p1 - 400) / 600) * 255), 0, 255)
+                if (p1 <= 400) ZeileLoeschen(2, 1)
+            }
+            // Zeile 3 (Muster 7): Pin P2 (Ziel < 400)
+            if (ZeilenStatus[3]) {
+                let p2 = pins.analogReadPin(AnalogPin.P2)
+                ZeilenHelligkeit[3] = Math.constrain(Math.floor(((p2 - 400) / 600) * 255), 0, 255)
+                if (p2 <= 400) ZeileLoeschen(3, 1)
+            }
+            // Zeile 4 (Muster 9): Lichtsensor / Hand annähern vor Tastendruck A/B (Ziel < 20)
+            if (ZeilenStatus[4]) {
+                let light1 = input.lightLevel()
+                ZeilenHelligkeit[4] = Math.constrain(Math.floor(((light1 - 20) / 100) * 255), 0, 255)
+                if (light1 <= 20) ZeileLoeschen(4, 1)
+            }
+        } else if (AktuellesLevel == 2) {
+            // LEVEL 2: Analoge Umgebungssensoren mit Distanz-Fading für alle 4 Zeilen (3, 5, 7, 9)
+            // Zeile 1 (Muster 3): Schallsensor (Ziel >= 128)
+            if (ZeilenStatus[1]) {
+                let sound = input.soundLevel()
+                ZeilenHelligkeit[1] = Math.constrain(Math.floor(((128 - sound) / 128) * 255), 0, 255)
+                if (sound >= 128) ZeileLoeschen(1, 2)
+            }
+            // Zeile 2 (Muster 5): Gesamtbeschleunigung / Schüttel-Annäherung (Ruhe ~1000 mg, Ziel >= 2000 mg)
+            if (ZeilenStatus[2]) {
+                let acc = input.acceleration(Dimension.Strength)
+                ZeilenHelligkeit[2] = Math.constrain(Math.floor(((2000 - acc) / 1000) * 255), 0, 255)
+                if (acc >= 2000) ZeileLoeschen(2, 2)
+            }
+            // Zeile 3 (Muster 7): Lichtstärke abdunkeln (Ziel <= 15)
+            if (ZeilenStatus[3]) {
+                let light2 = input.lightLevel()
+                ZeilenHelligkeit[3] = Math.constrain(Math.floor(((light2 - 15) / 100) * 255), 0, 255)
+                if (light2 <= 15) ZeileLoeschen(3, 2)
+            }
+            // Zeile 4 (Muster 9): Neigung nach rechts / X-Beschleunigung (Ziel >= 700 mg)
+            if (ZeilenStatus[4]) {
+                let tiltX = input.acceleration(Dimension.X)
+                ZeilenHelligkeit[4] = Math.constrain(Math.floor(((700 - tiltX) / 700) * 255), 0, 255)
+                if (tiltX >= 700) ZeileLoeschen(4, 2)
             }
         }
 
-        // 2. Analoge Orientierung / Kompass & Lichtsensor (Zeile 2)
-        if (ZeilenStatus[2]) {
-            let heading = input.compassHeading()
-            let diffKompass = Math.min(heading, 360 - heading)
-            // Je naeher an 0 Grad (Nord), desto dunkler
-            let helligkeitKompass = Math.constrain(Math.floor((diffKompass / 90) * 255), 0, 255)
-
-            let light = input.lightLevel()
-            // Je dunkler (Licht abdecken), desto dunkler
-            let helligkeitLicht = Math.constrain(Math.floor((light / 100) * 255), 0, 255)
-
-            // Kombination aus beiden analogen Bedingungen (minimaler Helligkeitswert)
-            let zielHelligkeit2 = Math.min(helligkeitKompass, helligkeitLicht)
-            if (zielHelligkeit2 != HelligkeitZeile2) {
-                HelligkeitZeile2 = zielHelligkeit2
-                updateNoetig = true
-            }
-
-            if (diffKompass < 10 || light < 10 || HelligkeitZeile2 <= 0) {
-                ZeileLoeschen(2, 2)
-            }
-        }
-
-        if (updateNoetig) {
-            UpdateGraphik()
-        }
+        UpdateGraphik()
     }
     basic.pause(50)
 })
